@@ -8,8 +8,8 @@ jobs:
     uses: kcaparas1630/Github-Workflows/.github/workflows/gcp-docker-build-push.yml@main
     with:
       dockerfile_path: Dockerfile
-      image_name: ai-interview-express
-      registry_path: us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-express
+      image_name: ai-interview-typescript-server
+      registry_path: us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server
     secrets:
       GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
