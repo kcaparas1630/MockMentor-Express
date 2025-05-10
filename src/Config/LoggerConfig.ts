@@ -1,4 +1,4 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, format, transports } from 'winston';
 import path from 'path';
 import fs from 'fs';
 
@@ -14,7 +14,7 @@ try {
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
   }
-  
+
   // Test write access
   fs.accessSync(logDir, fs.constants.W_OK);
 } catch (error) {
@@ -31,19 +31,19 @@ const consoleLogFormat = format.combine(
 
 // Create a Winston logger
 const logger = createLogger({
-  level: "info",
+  level: 'info',
   format: combine(colorize(), timestamp(), json()),
   transports: [
     new transports.Console({
       format: consoleLogFormat,
     }),
-    new transports.File({ 
+    new transports.File({
       filename: logFile,
       // handler for file write errors
       handleExceptions: true,
       maxsize: 5242880, // 5MB
       maxFiles: 5,
-      tailable: true
+      tailable: true,
     }),
   ],
 });
@@ -54,7 +54,7 @@ logger.info('Logger initialized', {
   logFile, // eslint-disable-next-line no-undef
   cwd: process.cwd(), // eslint-disable-next-line no-undef
   uid: process.getuid?.(), // eslint-disable-next-line no-undef
-  gid: process.getgid?.()
+  gid: process.getgid?.(),
 });
 
 export default logger;
