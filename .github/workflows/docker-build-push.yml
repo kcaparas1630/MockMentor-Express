@@ -26,10 +26,10 @@ jobs:
         run: docker build -f Dockerfile -t us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest .
 
       - name: Debug gcloud auth
-              run: |
-                gcloud auth list
-                gcloud config list
-                
+        run: |
+          gcloud auth list
+          gcloud config list
+
       - name: Push Docker Images
         run: |
           docker push us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest
