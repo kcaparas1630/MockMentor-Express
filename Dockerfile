@@ -12,7 +12,7 @@ RUN npm ci && \
 
 LABEL maintainer="Kent Caparas<kentcaparas12@gmail.com>"
 LABEL description="Docker image to run Task command line backend"
-LABEL version="1.0" 
+LABEL version="1.0"
 
 # Run in dev mode, `npm run serve` for production
 # CMD ["npm", "run", "serve", "--no-update-notifier", "--max-old-space-size=50"]
