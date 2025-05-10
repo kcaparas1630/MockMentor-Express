@@ -4,14 +4,7 @@ on:
     branches: [ main ]
 
 jobs:
-  gcp-auth:
-    uses: kcaparas1630/Github-Workflows/.github/workflows/gcp-auth-and-docker.yml@main
-    secrets:
-      GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-
   docker-build:
-    needs: gcp-auth
     uses: kcaparas1630/Github-Workflows/.github/workflows/gcp-docker-build.yml@main
     with:
       dockerfile_path: Dockerfile
