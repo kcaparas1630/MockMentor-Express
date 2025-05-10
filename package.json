@@ -13,7 +13,6 @@
     "serve": "node dist/server.js",
     "dev": "nodemon src/server.ts"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kcaparas1630/AI-Interview-Express.git"
@@ -50,6 +49,7 @@
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.1.0",
     "nodemon": "^3.1.10",
+    "prisma": "^6.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.0"

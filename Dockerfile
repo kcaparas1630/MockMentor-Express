@@ -7,6 +7,9 @@ COPY . ./
 RUN npm ci && \
   npm run build
 
+# RUN PRISMA GENERATE
+# RUN npx prisma generate
+
 LABEL maintainer="Kent Caparas<kentcaparas12@gmail.com>"
 LABEL description="Docker image to run Task command line backend"
 LABEL version="1.0"
