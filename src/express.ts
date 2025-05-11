@@ -1,3 +1,4 @@
+import './db';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -5,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import logger from './Config/LoggerConfig';
 import rateLimit from 'express-rate-limit';
+
 
 const app = express();
 const morganFormat = ':method :url :status :response-time ms';
