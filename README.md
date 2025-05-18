@@ -1,4 +1,4 @@
-# AI-Interview-Express
+# MockMentor-Express
 
 A lightweight, rate-limited Express.js service, containerized for scalable deployment.
 
