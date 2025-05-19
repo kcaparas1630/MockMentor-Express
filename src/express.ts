@@ -1,3 +1,4 @@
+import './firebaseAdmin';
 import './db';
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -6,7 +7,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import logger from './Config/LoggerConfig';
 import rateLimit from 'express-rate-limit';
-
+import { userRoutes } from './Routes/index';
 
 const app = express();
 const morganFormat = ':method :url :status :response-time ms';
@@ -41,5 +42,6 @@ app.use(
 );
 
 // Routes
+app.use('/api', userRoutes);
 
 export default app;
