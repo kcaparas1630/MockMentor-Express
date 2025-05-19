@@ -15,6 +15,7 @@ prisma.$connect().then(() => {
 export class InterviewService {
 // TODO: Implement the static methods for the interview service
 // get user from firebase token
+// might not be needed but just in case for testing
     static async getUserFromFirebaseToken(uid: string) {
         try {
             // fetch user from database using prisma
