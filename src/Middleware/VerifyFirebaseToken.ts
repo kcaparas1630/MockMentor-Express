@@ -6,11 +6,12 @@ const verifyFirebaseToken = async (
     req: AuthRequest, 
     res: Response, 
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
       }
   
       const token = authHeader.split('Bearer ')[1];
