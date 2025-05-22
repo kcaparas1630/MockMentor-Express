@@ -12,7 +12,7 @@ let serviceAccount;
 if (fs.existsSync(keyPath)) {
   serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
 } else {
-    // For production environment since firebase-admin-key is not found when pushed
+    // For production environment since firebase-admin-key.json is not found when pushed
   serviceAccount = {
     type: process.env.FIREBASE_TYPE,
     project_id: process.env.FIREBASE_PROJECT_ID,
