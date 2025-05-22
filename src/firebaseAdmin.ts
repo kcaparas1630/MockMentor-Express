@@ -3,11 +3,9 @@ import * as fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { ServiceAccount } from 'firebase-admin';
-import logger from './Config/LoggerConfig';
 
 dotenv.config();
 
-logger.info('Firebase private key exists:', !!process.env.FIREBASE_PRIVATE_KEY)
 const keyPath = path.join(__dirname, 'Config', 'firebase-admin-key.json');
 let serviceAccount;
 // for local development
