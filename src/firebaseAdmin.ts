@@ -7,7 +7,7 @@ import logger from './Config/LoggerConfig';
 
 dotenv.config();
 
-logger.error(process.env.FIREBASE_PRIVATE_KEY);
+logger.info('Firebase private key exists:', !!process.env.FIREBASE_PRIVATE_KEY)
 const keyPath = path.join(__dirname, 'Config', 'firebase-admin-key.json');
 let serviceAccount;
 // for local development
