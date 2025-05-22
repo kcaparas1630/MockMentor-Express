@@ -14,8 +14,11 @@ prisma.$connect().then(() => {
 
 export class InterviewService {
 // TODO: Implement the static methods for the interview service
-// get user from firebase token
-// might not be needed but just in case for testing
+    /**
+     * Get user from firebase token
+     * @param uid - firebase uid
+     * @returns user - user object
+     */
     static async getUserFromFirebaseToken(uid: string) {
         try {
             // fetch user from database using prisma
@@ -42,7 +45,7 @@ export class InterviewService {
                 return newUser;
             }
             return user;
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error fetching user from firebase token:', error);
             throw new Error('Failed to fetch user from firebase token');
         }

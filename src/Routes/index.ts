@@ -1,1 +1,1 @@
-export { default as userRoutes } from '../Routes/GetUserRoute';
+export { default as userRoutes } from './GetUserRoute';
