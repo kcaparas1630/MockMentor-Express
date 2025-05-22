@@ -1,7 +1,10 @@
 import admin from 'firebase-admin';
 import * as fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 import { ServiceAccount } from 'firebase-admin';
+
+dotenv.config();
 
 const keyPath = path.join(__dirname, 'Config', 'firebase-admin-key.json');
 let serviceAccount;
