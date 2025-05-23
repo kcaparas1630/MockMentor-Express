@@ -13,6 +13,9 @@
     "serve": "node dist/server.js",
     "dev": "nodemon src/server.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kcaparas1630/AI-Interview-Express.git"
