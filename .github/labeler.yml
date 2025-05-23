@@ -1,0 +1,20 @@
+prisma:
+  - changed-files:
+      - any-glob-to-any-file: 'prisma/*'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file: 'src/backend/*'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: 
+          - '*.md'
+          - 'docs/**'
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - '*.yml'
+          - '*.yaml'
