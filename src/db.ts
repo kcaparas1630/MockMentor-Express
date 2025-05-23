@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { FirebaseDatabaseError } from "firebase-admin/lib/utils/error";
 import * as admin from 'firebase-admin';
+import logger from "./Config/LoggerConfig";
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
@@ -46,8 +47,40 @@ export class InterviewService {
             }
             return user;
         } catch (error: unknown) {
-            console.error('Error fetching user from firebase token:', error);
+            logger.error('Error fetching user from firebase token:', error);
             throw new Error('Failed to fetch user from firebase token');
+        }
+    }
+    /**
+     * Get all questions for a user
+     * @param uid - firebase uid
+     * @returns questions - array of question objects
+     */
+    static async getAllQuestions() {
+        try {
+            const questions = await prisma.question.findMany();
+            return questions;
+        } catch (error: unknown) {
+            logger.error('Error fetching questions:', error);
+            throw new Error('Failed to fetch questions');
+        }
+    }
+    /**
+     * Get a question by id
+     * @param id - question id
+     * @returns question - question object
+     */
+    static async getQuestionById(id: string) {
+        try {
+            const question = await prisma.question.findUnique({
+                where: {
+                    id,
+                },
+            });
+            return question;
+        } catch (error: unknown) {
+            logger.error('Error fetching question by id:', error);
+            throw new Error('Failed to fetch question by id');
         }
     }
 }
