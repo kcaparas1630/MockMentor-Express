@@ -77,6 +77,10 @@ export class InterviewService {
                     id,
                 },
             });
+            if (!question) {
+                logger.error('Question not found');
+                throw new Error('Question not found');
+            }
             return question;
         } catch (error: unknown) {
             logger.error('Error fetching question by id:', error);
