@@ -6,7 +6,7 @@ backend:
   - changed-files:
       - any-glob-to-any-file: 'src/backend/*'
 
-docs:
+documentation:
   - changed-files:
       - any-glob-to-any-file: 
           - '*.md'
