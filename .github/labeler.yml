@@ -1,14 +1,14 @@
 prisma:
-  - 'prisma/*'
+ - 'prisma/*'
 
 backend:
-  - 'src/backend/*'
+ - 'src/backend/*'
 
 docs:
-  - '*.md'
-  - 'docs/**'
+ - '*.md'
+ - 'docs/**'
 
 config:
-  - '.github/**'
-  - '*.yml'
-  - '*.yaml'
+ - '.github/**'
+ - '*.yml'
+ - '*.yaml'
