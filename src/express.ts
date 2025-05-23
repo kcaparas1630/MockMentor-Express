@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import logger from './Config/LoggerConfig';
 import rateLimit from 'express-rate-limit';
-import { userRoutes } from './Routes/index';
+import { userRoutes, questionRoutes } from './Routes/index';
 
 const app = express();
 const morganFormat = ':method :url :status :response-time ms';
@@ -43,5 +43,6 @@ app.use(
 
 // Routes
 app.use('/api', userRoutes);
+app.use('/api', questionRoutes);
 
 export default app;
