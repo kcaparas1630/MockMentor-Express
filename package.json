@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
-    "serve": "node dist/server.js",
+    "serve": "node dist/src/server.js",
     "dev": "nodemon src/server.ts"
   },
   "prisma": {
