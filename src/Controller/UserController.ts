@@ -20,17 +20,12 @@ export const getUser = async (req: AuthRequest, res: Response): Promise<void> =>
 }
 
 export const createUser = async (req: AuthRequest, res: Response): Promise<void> => {
-    let uid: string | undefined;
     try {
-        uid = req.user?.uid;
-        if (!uid) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
-        }
-        const user = await UserService.createUser(uid, req.body);
-        res.json(user);
+        
+        const user = await UserService.createUser(req.body);
+        res.status(201).json(user);
     } catch (error) {
-        logger.error(`Error creating user for uid ${uid}`, error);
+        logger.error(`Error creating user`, error);
         res.status(500).json({ error: 'Failed to create user' });
     }
 }
