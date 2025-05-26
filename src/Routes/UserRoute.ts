@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUser } from '../Controller/GetUserController';
+import { getUser } from '../Controller/UserController';
 import verifyFirebaseToken from '../Middleware/VerifyFirebaseToken';
 const router = Router();
 
