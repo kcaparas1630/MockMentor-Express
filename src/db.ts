@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { FirebaseDatabaseError } from "firebase-admin/lib/utils/error";
 import * as admin from 'firebase-admin';
 import logger from "./Config/LoggerConfig";
+import { UserProfile } from "./Types/UserProfile";
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
@@ -13,7 +14,7 @@ prisma.$connect().then(() => {
     throw new Error(`Database connection error: ${error} `);
 });
 
-export class InterviewService {
+export class UserService {
 // TODO: Implement the static methods for the interview service
     /**
      * Get user from firebase token
@@ -28,27 +29,36 @@ export class InterviewService {
                     firebaseUid: uid,
                 }
             });
-            // create user if not found
-            if (!user) {
-                const firebaseUser = await admin.auth().getUser(uid);
-                const newUser = await prisma.user.create({
-                    data: {
-                        firebaseUid: uid,
-                        profile: {
-                            name: firebaseUser.displayName ?? "",
-                            email: firebaseUser.email ?? "",
-                            lastLogin: new Date(),
-                        },
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                    }
-                });
-                return newUser;
-            }
             return user;
         } catch (error: unknown) {
             logger.error('Error fetching user from firebase token:', error);
             throw new Error('Failed to fetch user from firebase token');
+        }
+    }
+    /**
+     * Create a user in the database
+     * @param uid - firebase uid
+     * @param user - user object
+     * @returns user - user object
+     */
+    static async createUser(uid: string, user: UserProfile) {
+        try {
+            const firebaseUser = await admin.auth().getUser(uid);
+            const newUser = await prisma.user.create({
+                data: {
+                    firebaseUid: uid,
+                    profile: {
+                        name: (firebaseUser.displayName || user.displayName) ?? "",
+                        email: firebaseUser.email ?? "",
+                        jobRole: user.jobRole ?? "",
+                        lastLogin: new Date(),
+                    },
+                }
+            });
+            return newUser;
+        } catch (error: unknown) {
+            logger.error('Error creating user:', error);
+            throw new Error('Failed to create user');
         }
     }
     /**
