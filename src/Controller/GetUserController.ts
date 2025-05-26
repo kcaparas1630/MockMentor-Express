@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { InterviewService } from '../db';
+import { UserService } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 
 export const getUser = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -10,7 +10,7 @@ export const getUser = async (req: AuthRequest, res: Response): Promise<void> =>
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        const user = await InterviewService.getUserFromFirebaseToken(uid);
+        const user = await UserService.getUserFromFirebaseToken(uid);
         res.json(user);
     } catch (error) {
         console.error(`Error fetching user for uid ${uid}`, error);
