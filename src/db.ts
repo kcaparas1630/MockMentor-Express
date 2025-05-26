@@ -61,6 +61,24 @@ export class UserService {
             throw new Error('Failed to create user');
         }
     }
+
+    static async updateUser(uid: string, user: UserProfile) {
+        try {
+            const updatedUser = await prisma.user.update({
+                where: { firebaseUid: uid },
+                data: user,
+            });
+            return updatedUser;
+        } catch (error: unknown) {
+            logger.error('Error updating user:', error);
+            throw new Error('Failed to update user');
+        }
+    }
+    
+
+}
+
+export class QuestionService {
     /**
      * Get all questions for a user
      * @param uid - firebase uid
