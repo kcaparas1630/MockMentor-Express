@@ -35,18 +35,18 @@ jobs:
         run: sops -d secrets/secrets.enc.yaml > .env
         
       - name: Build Docker image
-        run: docker build -f Dockerfile -t us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest .
+        run: docker build -f Dockerfile -t us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest .
         
       - name: Push Docker Images
         run: |
-          docker push us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest
-          docker tag us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:${{ github.sha }}
-          docker push us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:${{ github.sha }}
+          docker push us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest
+          docker tag us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:${{ github.sha }}
+          docker push us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:${{ github.sha }}
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: 'ai-interview-typescript-server'
-          image: 'us-east1-docker.pkg.dev/terraform-practice-455719/ai-interview-typescript-server/ai-interview-typescript-server:latest'
+          service: 'mockmentor-express-server-dev'
+          image: 'us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest'
           region: 'us-east1'
      
