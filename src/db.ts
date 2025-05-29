@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { FirebaseDatabaseError } from 'firebase-admin/lib/utils/error';
 import * as admin from 'firebase-admin';
 import logger from './Config/LoggerConfig';
-import { UserProfile } from './Types/UserProfile';
+import { ProfileData, UserUpdateRequest } from './Types/UserProfile';
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
@@ -44,7 +44,7 @@ export class UserService {
    * @param user - user object
    * @returns user - user object
    */
-  static async createUser(user: UserProfile) {
+  static async createUser(user: ProfileData) {
     try {
       const existingUser = await prisma.user.findFirst({
         where: {
@@ -82,13 +82,32 @@ export class UserService {
     }
   }
 
-  static async updateUser(uid: string, user: UserProfile) {
+  static async updateUser(uid: string, user: UserUpdateRequest) {
     try {
-      const updatedUser = await prisma.user.update({
+      // Get user first to preserve existing data.
+      const currentUser = await prisma.user.findUnique({
         where: { firebaseUid: uid },
-        data: user,
       });
-      return updatedUser;
+
+      // If user not found, throw error
+      if (!currentUser) {
+        throw new Error('User not found');
+      }
+
+      // Merge existing data with new data
+      const updatedUser = {
+        ...currentUser.profile,
+        ...user.profile,
+      };
+
+      // Update user with new data
+      const updateUser = await prisma.user.update({
+        where: { firebaseUid: uid },
+        data: {
+          profile: updatedUser,
+        },
+      });
+      return updateUser;
     } catch (error: unknown) {
       logger.error('Error updating user:', error);
       throw new Error('Failed to update user');
