@@ -3,7 +3,7 @@ import { createUser, getUser, updateUser } from '../Controller/UserController';
 import verifyFirebaseToken from '../Middleware/VerifyFirebaseToken';
 const router = Router();
 
-router.get('/user', getUser);
+router.get('/user', verifyFirebaseToken, getUser);
 router.post('/create-user', createUser);
 router.put('/update-user', verifyFirebaseToken, updateUser);
 
