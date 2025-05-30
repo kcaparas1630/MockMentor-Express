@@ -245,4 +245,39 @@ export class InterviewService {
       throw new Error('Failed to save answer');
     }
   }
+  /**
+   * Complete an interview session
+   * @param sessionId - session id
+   * @returns interview - interview object
+   */
+  static async completeInterview(sessionId: string) {
+    try {
+      const interview = await prisma.interview.findUnique({
+        where: { id: sessionId },
+        include: {
+          questions: true
+        }
+      });
+
+      if (!interview) {
+        throw new Error('Interview not found');
+      }
+
+      // Calculate duration
+      const duration = Date.now() - interview.date.getTime();
+
+      await prisma.interview.update({
+        where: { id: sessionId },
+        data: {
+          duration: Math.floor(duration / 1000), // Duration in seconds
+          timestamp: new Date()
+        }
+      });
+
+      return interview;
+    } catch (error) {
+      logger.error('Error completing interview:', error);
+      throw new Error('Failed to complete interview');
+    }
+  }
 }
