@@ -17,11 +17,18 @@ prisma
     throw new Error(`Database connection error: ${error} `);
   });
 
+/**
+ * Service class for handling user-related database operations
+ * Manages user authentication, profile creation, and updates
+ */
 export class UserService {
   /**
-   * Get user from firebase token
-   * @param uid - firebase uid
-   * @returns user - user object
+   * Retrieve user data from database using Firebase UID
+   * @param uid - Firebase user identifier from authenticated token
+   * @returns Promise<User | null> - User object with profile data or null if not found
+   * @throws Error if database query fails
+   * @example
+   * const user = await UserService.getUserFromFirebaseToken("firebase_uid_123");
    */
   static async getUserFromFirebaseToken(uid: string) {
     try {
@@ -37,11 +44,19 @@ export class UserService {
       throw new Error('Failed to fetch user from firebase token');
     }
   }
+
   /**
-   * Create a user in the database
-   * @param uid - firebase uid
-   * @param user - user object
-   * @returns user - user object
+   * Create a new user account in both Firebase Auth and local database
+   * @param user - ProfileData containing user information (email, password, displayName, jobRole)
+   * @returns Promise<User> - Created user object with database ID and profile
+   * @throws Error if user already exists or Firebase/database creation fails
+   * @example
+   * const newUser = await UserService.createUser({
+   *   email: "john@example.com",
+   *   password: "securePassword",
+   *   displayName: "John Doe",
+   *   jobRole: "Software Engineer"
+   * });
    */
   static async createUser(user: ProfileData) {
     try {
@@ -81,6 +96,17 @@ export class UserService {
     }
   }
 
+  /**
+   * Update existing user profile information
+   * @param uid - Firebase user identifier
+   * @param user - UserUpdateRequest containing fields to update
+   * @returns Promise<User> - Updated user object with merged profile data
+   * @throws Error if user not found or update operation fails
+   * @example
+   * const updatedUser = await UserService.updateUser("firebase_uid", {
+   *   profile: { jobRole: "Senior Software Engineer" }
+   * });
+   */
   static async updateUser(uid: string, user: UserUpdateRequest) {
     try {
       // Get user first to preserve existing data.
@@ -114,11 +140,18 @@ export class UserService {
   }
 }
 
+/**
+ * Service class for managing interview questions
+ * Handles retrieval and querying of interview question bank
+ */
 export class QuestionService {
   /**
-   * Get all questions for a user
-   * @param uid - firebase uid
-   * @returns questions - array of question objects
+   * Retrieve all available interview questions from the database
+   * @returns Promise<Question[]> - Array of all interview questions with their types and content
+   * @throws Error if database query fails
+   * @example
+   * const questions = await QuestionService.getAllQuestions();
+   * // Returns: [{ id: "1", question: "Tell me about yourself", questionType: "behavioral" }, ...]
    */
   static async getAllQuestions() {
     try {
@@ -129,10 +162,15 @@ export class QuestionService {
       throw new Error('Failed to fetch questions');
     }
   }
+
   /**
-   * Get a question by id
-   * @param id - question id
-   * @returns question - question object
+   * Retrieve a specific interview question by its unique identifier
+   * @param id - Unique question identifier from database
+   * @returns Promise<Question> - Question object containing question text and type
+   * @throws Error if question not found or database query fails
+   * @example
+   * const question = await QuestionService.getQuestionById("question_123");
+   * // Returns: { id: "question_123", question: "Explain REST APIs", questionType: "technical" }
    */
   static async getQuestionById(id: string) {
     try {
@@ -153,11 +191,31 @@ export class QuestionService {
   }
 }
 
+/**
+ * Service class for managing interview sessions and candidate responses
+ * Handles interview lifecycle from creation to completion with AI feedback integration
+ */
 export class InterviewService {
   /**
-   * Create a new interview session
-   * @param sessionData - session data
-   * @returns interview - interview object
+   * Create a new interview session for a candidate
+   * @param sessionData - Object containing interview configuration
+   * @param sessionData.userId - Database user ID
+   * @param sessionData.jobRole - Target job role for the interview
+   * @param sessionData.jobLevel - Experience level (junior, mid, senior)
+   * @param sessionData.interviewType - Type of interview (technical, behavioral, full-stack)
+   * @param sessionData.totalQuestions - Number of questions in the interview
+   * @param sessionData.startedAt - Timestamp when interview began
+   * @returns Promise<Interview> - Created interview session with unique ID
+   * @throws Error if session creation fails
+   * @example
+   * const session = await InterviewService.createSession({
+   *   userId: "user_123",
+   *   jobRole: "Software Engineer",
+   *   jobLevel: "mid",
+   *   interviewType: "technical",
+   *   totalQuestions: 5,
+   *   startedAt: new Date()
+   * });
    */
   static async createSession(sessionData: {
     userId: string;
@@ -189,10 +247,15 @@ export class InterviewService {
       throw new Error('Failed to create interview session');
     }
   }
+
   /**
-   * Get a session by id
-   * @param sessionId - session id
-   * @returns interview - interview object
+   * Retrieve an existing interview session with all associated questions and answers
+   * @param sessionId - Unique interview session identifier
+   * @returns Promise<Interview | null> - Interview session with questions array or null if not found
+   * @throws Error if database query fails
+   * @example
+   * const session = await InterviewService.getSession("session_123");
+   * // Returns session with questions: { id: "session_123", questions: [...], metadata: {...} }
    */
   static async getSession(sessionId: string) {
     try {
@@ -208,13 +271,24 @@ export class InterviewService {
       throw new Error('Failed to get interview session');
     }
   }
+
   /**
-   * Save an answer to a question
-   * @param sessionId - session id
-   * @param questionId - question id
-   * @param answer - answer
-   * @param questionText - question text
-   * @param feedback - feedback
+   * Save a candidate's answer to a specific interview question with AI feedback
+   * @param sessionId - Interview session identifier
+   * @param questionId - Question identifier from the question bank
+   * @param answer - Candidate's text response to the question
+   * @param questionText - The actual question text for reference
+   * @param feedback - Optional AI-generated feedback for the answer
+   * @returns Promise<void> - Resolves when answer is successfully saved
+   * @throws Error if save operation fails or question not found
+   * @example
+   * await InterviewService.saveAnswer(
+   *   "session_123",
+   *   "question_456",
+   *   "I have 5 years of experience in React...",
+   *   "Tell me about your React experience",
+   *   { score: 85, feedback: "Good answer with specific examples" }
+   * );
    */
   static async saveAnswer(
     sessionId: string,
@@ -245,10 +319,15 @@ export class InterviewService {
       throw new Error('Failed to save answer');
     }
   }
+
   /**
-   * Complete an interview session
-   * @param sessionId - session id
-   * @returns interview - interview object
+   * Mark an interview session as completed and calculate final duration
+   * @param sessionId - Interview session identifier
+   * @returns Promise<Interview> - Completed interview with all questions and calculated duration
+   * @throws Error if session not found or completion fails
+   * @example
+   * const completedInterview = await InterviewService.completeInterview("session_123");
+   * // Returns interview with duration calculated and timestamp updated
    */
   static async completeInterview(sessionId: string) {
     try {
@@ -280,10 +359,22 @@ export class InterviewService {
       throw new Error('Failed to complete interview');
     }
   }
+
   /**
-   * Update interview feedback
-   * @param sessionId - session id
-   * @param feedback - feedback
+   * Update interview session with comprehensive AI-generated feedback and final score
+   * @param sessionId - Interview session identifier
+   * @param feedback - Comprehensive feedback object from AI analysis
+   * @param feedback.overallScore - Overall interview score (0-100)
+   * @param feedback.improvements - Array of specific improvement suggestions
+   * @param feedback.overallFeedback - General feedback summary
+   * @returns Promise<void> - Resolves when feedback is successfully saved
+   * @throws Error if update fails or session not found
+   * @example
+   * await InterviewService.updateInterviewFeedback("session_123", {
+   *   overallScore: 78,
+   *   improvements: ["Provide more specific examples", "Improve technical explanations"],
+   *   overallFeedback: "Strong performance with room for improvement in communication"
+   * });
    */
   static async updateInterviewFeedback(
     sessionId: string,
@@ -307,10 +398,15 @@ export class InterviewService {
       throw new Error('Failed to update interview feedback');
     }
   }
+
   /**
-   * Get an interview with results
-   * @param sessionId - session id
-   * @returns interview - interview object
+   * Retrieve complete interview results including all questions, answers, and feedback
+   * @param sessionId - Interview session identifier
+   * @returns Promise<Interview | null> - Complete interview data with nested questions or null
+   * @throws Error if database query fails
+   * @example
+   * const results = await InterviewService.getInterviewWithResults("session_123");
+   * // Returns: { score: 78, feedback: "...", questions: [...], improvements: [...] }
    */
   static async getInterviewWithResults(sessionId: string) {
     try {
@@ -327,11 +423,33 @@ export class InterviewService {
     }
   }
 }
+
+/**
+ * Service class for AI-powered interview analysis and feedback generation
+ * Integrates with external AI microservice for answer evaluation and comprehensive feedback
+ */
 export class AIService {
   /**
-   * Process an answer
-   * @param data - data
-   * @returns response - response
+   * Process individual interview answer and generate immediate feedback using AI microservice
+   * @param data - Answer analysis request data
+   * @param data.question - The interview question text
+   * @param data.answer - Candidate's response to the question
+   * @param data.jobRole - Target job role for context-specific evaluation
+   * @param data.jobLevel - Experience level for appropriate feedback depth
+   * @param data.interviewType - Interview type for specialized evaluation criteria
+   * @param data.questionType - Question category (behavioral, technical, coding, etc.)
+   * @returns Promise<QuestionFeedback> - AI-generated feedback with score, suggestions, and tips
+   * @throws Error if AI service is unavailable or returns invalid response
+   * @example
+   * const feedback = await AIService.processAnswer({
+   *   question: "Describe your experience with microservices",
+   *   answer: "I've worked with Docker and Kubernetes...",
+   *   jobRole: "Backend Engineer",
+   *   jobLevel: "senior",
+   *   interviewType: "technical",
+   *   questionType: "technical"
+   * });
+   * // Returns: { score: 85, feedback: "Good technical depth...", strengths: [...], improvements: [...] }
    */
   static async processAnswer(data: {
     question: string;
@@ -369,10 +487,26 @@ export class AIService {
       throw new Error('Failed to process individual answer feedback');
     }
   }
+
   /**
-   * Process all answers
-   * @param data - data
-   * @returns response - response
+   * Generate comprehensive interview feedback by analyzing all answers collectively
+   * @param data - Complete interview data for holistic analysis
+   * @param data.jobRole - Target job role for role-specific evaluation
+   * @param data.jobLevel - Experience level for appropriate feedback complexity
+   * @param data.interviewType - Interview type for specialized assessment criteria
+   * @param data.questions - Array of all questions with answers and individual feedback
+   * @returns Promise<ComprehensiveFeedback> - Overall performance analysis with actionable insights
+   * @throws Error if comprehensive analysis fails
+   * @example
+   * const comprehensiveFeedback = await AIService.processAllAnswers({
+   *   jobRole: "Full Stack Developer",
+   *   jobLevel: "mid",
+   *   interviewType: "technical",
+   *   questions: [
+   *     { question: "...", answer: "...", questionType: "technical", individualFeedback: "..." }
+   *   ]
+   * });
+   * // Returns: { overallScore: 78, strengths: [...], areasToImprove: [...], questionFeedback: [...] }
    */
   static async processAllAnswers(data: {
     jobRole: string;
