@@ -34,7 +34,7 @@ model InterviewQuestion {
   questionText String
   answer       String
   questionType String
-  feedback     String?   // Store AI feedback as JSON string
+  feedback     Json?   // Store AI feedback as JSON string
   answeredAt   DateTime  @default(now())
 }
 
