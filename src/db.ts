@@ -184,4 +184,19 @@ export class InterviewService {
       throw new Error('Failed to create interview session');
     }
   }
+  static async getSession(sessionId: string) {
+    try {
+      const interview = await prisma.interview.findUnique({
+        where: { id: sessionId },
+        include: {
+          questions: true
+        }
+      });
+      return interview;
+    } catch (error) {
+      logger.error('Error getting interview session:', error);
+      throw new Error('Failed to get interview session');
+    }
+  }
+
 }
