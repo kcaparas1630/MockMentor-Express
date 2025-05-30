@@ -12,6 +12,11 @@ export const getUser = async (req: AuthRequest, res: Response): Promise<void> =>
             return;
         }
         const user = await UserService.getUserFromFirebaseToken(uid);
+
+        if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
         res.json(user);
     } catch (error) {
         logger.error(`Error fetching user for uid ${uid}`, error);
