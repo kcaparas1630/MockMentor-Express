@@ -17,11 +17,7 @@ prisma
     throw new Error(`Database connection error: ${error} `);
   });
 
-/**
- * Service class for handling user-related database operations
- * Manages user authentication, profile creation, and updates
- */
-export class UserService {
+
   /**
    * Retrieve user data from database using Firebase UID
    * @param uid - Firebase user identifier from authenticated token
@@ -30,7 +26,7 @@ export class UserService {
    * @example
    * const user = await UserService.getUserFromFirebaseToken("firebase_uid_123");
    */
-  static async getUserFromFirebaseToken(uid: string) {
+  export const getUserFromFirebaseToken = async (uid: string) => {
     try {
       // fetch user from database using prisma
       const user = await prisma.user.findUnique({
@@ -58,7 +54,7 @@ export class UserService {
    *   jobRole: "Software Engineer"
    * });
    */
-  static async createUser(user: ProfileData) {
+  export const createUser = async (user: ProfileData) => {
     try {
       const existingUser = await prisma.user.findFirst({
         where: {
@@ -107,7 +103,7 @@ export class UserService {
    *   profile: { jobRole: "Senior Software Engineer" }
    * });
    */
-  static async updateUser(uid: string, user: UserUpdateRequest) {
+  export const updateUser = async (uid: string, user: UserUpdateRequest) => {
     try {
       // Get user first to preserve existing data.
       const currentUser = await prisma.user.findUnique({
@@ -138,13 +134,8 @@ export class UserService {
       throw new Error('Failed to update user');
     }
   }
-}
 
-/**
- * Service class for managing interview questions
- * Handles retrieval and querying of interview question bank
- */
-export class QuestionService {
+
   /**
    * Retrieve all available interview questions from the database
    * @returns Promise<Question[]> - Array of all interview questions with their types and content
@@ -153,7 +144,7 @@ export class QuestionService {
    * const questions = await QuestionService.getAllQuestions();
    * // Returns: [{ id: "1", question: "Tell me about yourself", questionType: "behavioral" }, ...]
    */
-  static async getAllQuestions() {
+  export const getAllQuestions = async () => {
     try {
       const questions = await prisma.question.findMany();
       return questions;
@@ -172,7 +163,7 @@ export class QuestionService {
    * const question = await QuestionService.getQuestionById("question_123");
    * // Returns: { id: "question_123", question: "Explain REST APIs", questionType: "technical" }
    */
-  static async getQuestionById(id: string) {
+  export const getQuestionById = async (id: string) => {
     try {
       const question = await prisma.question.findUnique({
         where: {
@@ -189,13 +180,9 @@ export class QuestionService {
       throw new Error('Failed to fetch question by id');
     }
   }
-}
 
-/**
- * Service class for managing interview sessions and candidate responses
- * Handles interview lifecycle from creation to completion with AI feedback integration
- */
-export class InterviewService {
+
+
   /**
    * Create a new interview session for a candidate
    * @param sessionData - Object containing interview configuration
@@ -217,14 +204,14 @@ export class InterviewService {
    *   startedAt: new Date()
    * });
    */
-  static async createSession(sessionData: {
+  export const createSession = async (sessionData: {
     userId: string;
     jobRole: string;
     jobLevel: string;
     interviewType: string;
     totalQuestions: number;
     startedAt: Date;
-  }) {
+  }) => {
     try {
       const interview = await prisma.interview.create({
         data: {
@@ -257,7 +244,7 @@ export class InterviewService {
    * const session = await InterviewService.getSession("session_123");
    * // Returns session with questions: { id: "session_123", questions: [...], metadata: {...} }
    */
-  static async getSession(sessionId: string) {
+  export const getSession = async (sessionId: string) => {
     try {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
@@ -290,13 +277,13 @@ export class InterviewService {
    *   { score: 85, feedback: "Good answer with specific examples" }
    * );
    */
-  static async saveAnswer(
+  export const saveAnswer = async (
     sessionId: string,
     questionId: string,
     answer: string,
     questionText: string,
     feedback?: QuestionFeedback
-  ) {
+  ) => {
     try {
       // Get question type
       const question = await prisma.question.findUnique({
@@ -329,7 +316,7 @@ export class InterviewService {
    * const completedInterview = await InterviewService.completeInterview("session_123");
    * // Returns interview with duration calculated and timestamp updated
    */
-  static async completeInterview(sessionId: string) {
+  export const completeInterview = async (sessionId: string) => {
     try {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
@@ -376,14 +363,14 @@ export class InterviewService {
    *   overallFeedback: "Strong performance with room for improvement in communication"
    * });
    */
-  static async updateInterviewFeedback(
+  export const updateInterviewFeedback = async (
     sessionId: string,
     feedback: {
       overallScore: number;
       improvements: string[];
       overallFeedback: string;
     }
-  ) {
+  ) => {
     try {
       await prisma.interview.update({
         where: { id: sessionId },
@@ -408,7 +395,7 @@ export class InterviewService {
    * const results = await InterviewService.getInterviewWithResults("session_123");
    * // Returns: { score: 78, feedback: "...", questions: [...], improvements: [...] }
    */
-  static async getInterviewWithResults(sessionId: string) {
+  export const getInterviewWithResults = async (sessionId: string) => {
     try {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
@@ -422,13 +409,8 @@ export class InterviewService {
       throw new Error('Failed to get interview results');
     }
   }
-}
 
-/**
- * Service class for AI-powered interview analysis and feedback generation
- * Integrates with external AI microservice for answer evaluation and comprehensive feedback
- */
-export class AIService {
+
   /**
    * Process individual interview answer and generate immediate feedback using AI microservice
    * @param data - Answer analysis request data
@@ -451,15 +433,19 @@ export class AIService {
    * });
    * // Returns: { score: 85, feedback: "Good technical depth...", strengths: [...], improvements: [...] }
    */
-  static async processAnswer(data: {
+  export const processAnswer = async (data: {
     question: string;
     answer: string;
     jobRole: string;
     jobLevel: string;
     interviewType: string;
     questionType: string;
-  }) {
+  }) => {
     try {
+      if (!process.env.PYTHON_API_URL) {
+        logger.error('PYTHON_API_URL is not set');
+        throw new Error('PYTHON_API_URL is not set');
+      }
       // Make REST API call to AI microservice
       const response = await fetch(`${process.env.PYTHON_API_URL}/interview-feedback`, {
         method: 'POST',
@@ -508,7 +494,7 @@ export class AIService {
    * });
    * // Returns: { overallScore: 78, strengths: [...], areasToImprove: [...], questionFeedback: [...] }
    */
-  static async processAllAnswers(data: {
+  export const processAllAnswers = async (data: {
     jobRole: string;
     jobLevel: string;
     interviewType: string;
@@ -518,7 +504,7 @@ export class AIService {
       questionType: string;
       individualFeedback?: string;
     }>;
-  }) {
+  }) => {
     try {
       // This will process all answers together and provide comprehensive feedback
       // For now, returning a mock response structure
@@ -544,4 +530,3 @@ export class AIService {
       throw new Error('Failed to process comprehensive feedback');
     }
   }
-}
