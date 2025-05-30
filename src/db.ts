@@ -25,6 +25,7 @@ export class UserService {
    * @returns user - user object
    */
   static async getUserFromFirebaseToken(uid: string) {
+
     try {
       // fetch user from database using prisma
       const user = await prisma.user.findUnique({
@@ -97,7 +98,7 @@ export class UserService {
       // Merge existing data with new data
       const updatedUser = {
         ...currentUser.profile,
-        ...user.profile,
+        ...user.profile ?? {}, // Ensure user.profile is not undefined
       };
 
       // Update user with new data
