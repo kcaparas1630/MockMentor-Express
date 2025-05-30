@@ -154,6 +154,11 @@ export class QuestionService {
 }
 
 export class InterviewService {
+  /**
+   * Create a new interview session
+   * @param sessionData - session data
+   * @returns interview - interview object
+   */
   static async createSession(sessionData: {
     userId: string;
     jobRole: string;
@@ -174,9 +179,9 @@ export class InterviewService {
           metadata: {
             jobRole: sessionData.jobRole,
             jobLevel: sessionData.jobLevel,
-            totalQuestions: sessionData.totalQuestions
-          }
-        }
+            totalQuestions: sessionData.totalQuestions,
+          },
+        },
       });
       return interview;
     } catch (error) {
@@ -184,13 +189,18 @@ export class InterviewService {
       throw new Error('Failed to create interview session');
     }
   }
+  /**
+   * Get a session by id
+   * @param sessionId - session id
+   * @returns interview - interview object
+   */
   static async getSession(sessionId: string) {
     try {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
         include: {
-          questions: true
-        }
+          questions: true,
+        },
       });
       return interview;
     } catch (error) {
@@ -198,5 +208,41 @@ export class InterviewService {
       throw new Error('Failed to get interview session');
     }
   }
+  /**
+   * Save an answer to a question
+   * @param sessionId - session id
+   * @param questionId - question id
+   * @param answer - answer
+   * @param questionText - question text
+   * @param feedback - feedback
+   */
+  static async saveAnswer(
+    sessionId: string,
+    questionId: string,
+    answer: string,
+    questionText: string,
+    feedback?: QuestionFeedback
+  ) {
+    try {
+      // Get question type
+      const question = await prisma.question.findUnique({
+        where: { id: questionId },
+      });
 
+      await prisma.interviewQuestion.create({
+        data: {
+          interviewId: sessionId,
+          questionId: questionId,
+          questionText: questionText,
+          answer: answer,
+          questionType: question?.questionType || '',
+          feedback: feedback ? JSON.stringify(feedback) : null,
+          answeredAt: new Date(),
+        },
+      });
+    } catch (error) {
+      logger.error('Error saving answer:', error);
+      throw new Error('Failed to save answer');
+    }
+  }
 }
