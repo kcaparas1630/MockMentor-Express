@@ -14,6 +14,7 @@ import {
 } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 import logger from '../Config/LoggerConfig';
+import { CompletedInterviewQuestion } from '../Types/QuestionsType';
 
 /**
  * Start a new interview session for the authenticated user
@@ -150,19 +151,12 @@ export const submitUserResponse = async (req: AuthRequest, res: Response) => {
         jobRole: metadata.jobRole || '',
         jobLevel: metadata.jobLevel || '',
         interviewType: session.interviewType,
-        questions: completedInterview.questions.map(
-          (q: {
-            questionText: string;
-            answer: string;
-            questionType: string;
-            feedback: string | null;
-          }) => ({
-            question: q.questionText,
-            answer: q.answer,
-            questionType: q.questionType,
-            individualFeedback: q.feedback || undefined,
-          })
-        ),
+        questions: completedInterview.questions.map((q: CompletedInterviewQuestion) => ({
+          question: q.questionText,
+          answer: q.answer,
+          questionType: q.questionType,
+          individualFeedback: q.feedback ? String(q.feedback) : undefined,
+        })),
       };
 
       // Process all answers together for comprehensive feedback
