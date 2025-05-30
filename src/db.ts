@@ -317,13 +317,97 @@ export class InterviewService {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
         include: {
-          questions: true
-        }
+          questions: true,
+        },
       });
       return interview;
     } catch (error) {
       logger.error('Error getting interview results:', error);
       throw new Error('Failed to get interview results');
+    }
+  }
+}
+export class AIService {
+  /**
+   * Process an answer
+   * @param data - data
+   * @returns response - response
+   */
+  static async processAnswer(data: {
+    question: string;
+    answer: string;
+    jobRole: string;
+    jobLevel: string;
+    interviewType: string;
+    questionType: string;
+  }) {
+    try {
+      // Make REST API call to AI microservice
+      const response = await fetch(`${process.env.PYTHON_API_URL}/interview-feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: data.question,
+          answer: data.answer,
+          jobRole: data.jobRole,
+          jobLevel: data.jobLevel,
+          interviewType: data.interviewType,
+          questionType: data.questionType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI service responded with status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      return responseData; // Return the AI service response directly
+    } catch (error) {
+      logger.error('Error processing individual answer:', error);
+      throw new Error('Failed to process individual answer feedback');
+    }
+  }
+  /**
+   * Process all answers
+   * @param data - data
+   * @returns response - response
+   */
+  static async processAllAnswers(data: {
+    jobRole: string;
+    jobLevel: string;
+    interviewType: string;
+    questions: Array<{
+      question: string;
+      answer: string;
+      questionType: string;
+      individualFeedback?: string;
+    }>;
+  }) {
+    try {
+      // This will process all answers together and provide comprehensive feedback
+      // For now, returning a mock response structure
+      return {
+        overallScore: 75, // Score out of 100
+        overallFeedback: 'Overall performance shows good technical knowledge...',
+        improvements: [
+          'Work on providing more specific examples in behavioral questions',
+          'Practice explaining complex technical concepts more clearly',
+          'Improve communication skills for better articulation',
+        ],
+        strengths: ['Strong technical knowledge', 'Good problem-solving approach'],
+        areasToImprove: ['Communication clarity', 'Providing concrete examples'],
+        questionFeedback: data.questions.map((q, index) => ({
+          questionNumber: index + 1,
+          question: q.question,
+          feedback: 'Specific feedback for this answer...',
+          score: Math.floor(Math.random() * 30) + 70, // Random score for demo
+        })),
+      };
+    } catch (error) {
+      logger.error('Error processing all answers:', error);
+      throw new Error('Failed to process comprehensive feedback');
     }
   }
 }
