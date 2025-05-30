@@ -14,7 +14,7 @@ import {
 } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 import logger from '../Config/LoggerConfig';
-import { CompletedInterviewQuestion } from '../Types/QuestionsType';
+import { CompletedInterviewQuestion, InterviewQuestion } from '../Types/QuestionsType';
 
 /**
  * Start a new interview session for the authenticated user
@@ -50,7 +50,7 @@ export const startInterview = async (req: AuthRequest, res: Response) => {
       res.status(404).json({ error: 'No questions available' });
       return;
     }
-
+    // TODO: Validate job levels and interview type. Restrict to only certain values.
     const { jobLevel, interviewType } = req.body;
     if (!jobLevel || !interviewType) {
       res.status(400).json({ error: 'Missing required fields: jobLevel, interviewType' });
@@ -98,10 +98,15 @@ export const submitUserResponse = async (req: AuthRequest, res: Response) => {
     const { sessionId, questionId, answerResponse, currentQuestionIndex } = req.body;
 
     // Validate required fields
-    if (!sessionId || !questionId || !answerResponse) {
+    if (!sessionId || !questionId || !answerResponse || !currentQuestionIndex) {
       res
         .status(400)
-        .json({ error: 'Missing required fields: sessionId, questionId, answerResponse' });
+        .json({ error: 'Missing required fields: sessionId, questionId, answerResponse, currentQuestionIndex' });
+      return;
+    }
+
+    if (typeof currentQuestionIndex !== 'number' || currentQuestionIndex < 0) {
+      res.status(400).json({ error: 'Invalid currentQuestionIndex' });
       return;
     }
 
@@ -116,6 +121,19 @@ export const submitUserResponse = async (req: AuthRequest, res: Response) => {
     const question = await getQuestionById(questionId);
     if (!question) {
       res.status(404).json({ error: 'Question not found' });
+      return;
+    }
+
+    // Validate this is the expected question for the current index.
+    const allQuestionsValidated = await getAllQuestions();
+    if (currentQuestionIndex >= allQuestionsValidated.length || allQuestionsValidated[currentQuestionIndex].id !== questionId) {
+      res.status(400).json({ error: 'Invalid currentQuestionIndex' });
+      return;
+    }
+    
+    const existingAnswer = session.questions.find((q: InterviewQuestion) => q.questionId === questionId);
+    if (existingAnswer) {
+      res.status(400).json({ error: 'Question already answered' });
       return;
     }
 
@@ -258,6 +276,8 @@ export const getQuestionByIndex = async (req: AuthRequest, res: Response) => {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
+
+    // TODO: Verify user has session record in data store before returning a question. Returns 403 if not found.
 
     const { questionIndex } = req.params;
     const index = parseInt(questionIndex);
