@@ -13,6 +13,14 @@ export interface QuestionFeedback {
     tips: string[];
 }
 
+export interface InterviewQuestion {
+    id: string;
+    interviewId: string;
+    questionId: string;
+    questionText: string;
+    answer: string;
+    questionType: string;
+}
 export interface CompletedInterviewQuestion {
     id: string;
     interviewId: string;
