@@ -255,8 +255,8 @@ export class InterviewService {
       const interview = await prisma.interview.findUnique({
         where: { id: sessionId },
         include: {
-          questions: true
-        }
+          questions: true,
+        },
       });
 
       if (!interview) {
@@ -270,14 +270,41 @@ export class InterviewService {
         where: { id: sessionId },
         data: {
           duration: Math.floor(duration / 1000), // Duration in seconds
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       return interview;
     } catch (error) {
       logger.error('Error completing interview:', error);
       throw new Error('Failed to complete interview');
+    }
+  }
+  /**
+   * Update interview feedback
+   * @param sessionId - session id
+   * @param feedback - feedback
+   */
+  static async updateInterviewFeedback(
+    sessionId: string,
+    feedback: {
+      overallScore: number;
+      improvements: string[];
+      overallFeedback: string;
+    }
+  ) {
+    try {
+      await prisma.interview.update({
+        where: { id: sessionId },
+        data: {
+          score: feedback.overallScore,
+          improvements: feedback.improvements,
+          feedback: feedback.overallFeedback,
+        },
+      });
+    } catch (error) {
+      logger.error('Error updating interview feedback:', error);
+      throw new Error('Failed to update interview feedback');
     }
   }
 }
