@@ -25,8 +25,12 @@ export const getUser = async (req: AuthRequest, res: Response): Promise<void> =>
 }
 
 export const createUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        res.status(400).json({ error: 'Email and password are required' });
+        return;
+    }
     try {
-        
         const user = await UserService.createUser(req.body);
         res.status(201).json(user);
     } catch (error) {
