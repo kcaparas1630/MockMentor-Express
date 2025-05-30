@@ -21,6 +21,7 @@ model User {
 type Profile {
   name      String
   email     String
+  jobRole   String
   lastLogin DateTime
 }
 

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { InterviewService } from '../db';
+import { QuestionService } from '../db';
 import logger from '../Config/LoggerConfig';
 export const getQuestion = async (req: Request, res: Response) => {
     try {
-        const question = await InterviewService.getAllQuestions();
+        const question = await QuestionService.getAllQuestions();
         res.status(200).json(question);
     } catch (error: unknown) {
         logger.error('Error fetching questions:', error);
@@ -13,7 +13,7 @@ export const getQuestion = async (req: Request, res: Response) => {
 
 export const getQuestionById = async (req: Request, res: Response) => {
     try {
-        const question = await InterviewService.getQuestionById(req.params.id);
+        const question = await QuestionService.getQuestionById(req.params.id);
         res.status(200).json(question);
     } catch (error: unknown) {
         logger.error('Error fetching question by id:', error);
