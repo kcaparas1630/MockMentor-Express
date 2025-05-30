@@ -307,4 +307,23 @@ export class InterviewService {
       throw new Error('Failed to update interview feedback');
     }
   }
+  /**
+   * Get an interview with results
+   * @param sessionId - session id
+   * @returns interview - interview object
+   */
+  static async getInterviewWithResults(sessionId: string) {
+    try {
+      const interview = await prisma.interview.findUnique({
+        where: { id: sessionId },
+        include: {
+          questions: true
+        }
+      });
+      return interview;
+    } catch (error) {
+      logger.error('Error getting interview results:', error);
+      throw new Error('Failed to get interview results');
+    }
+  }
 }
