@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getAllQuestions, getQuestionById } from '../db';
 import logger from '../Config/LoggerConfig';
-export const getQuestion = async (req: Request, res: Response) => {
+export const getQuestionController = async (req: Request, res: Response) => {
     try {
         const question = await getAllQuestions();
         res.status(200).json(question);
