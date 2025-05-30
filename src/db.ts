@@ -3,7 +3,7 @@ import { FirebaseDatabaseError } from 'firebase-admin/lib/utils/error';
 import * as admin from 'firebase-admin';
 import logger from './Config/LoggerConfig';
 import { ProfileData, UserUpdateRequest } from './Types/UserProfile';
-
+import { QuestionFeedback } from './Types/QuestionsType';
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
@@ -18,14 +18,12 @@ prisma
   });
 
 export class UserService {
-  // TODO: Implement the static methods for the interview service
   /**
    * Get user from firebase token
    * @param uid - firebase uid
    * @returns user - user object
    */
   static async getUserFromFirebaseToken(uid: string) {
-
     try {
       // fetch user from database using prisma
       const user = await prisma.user.findUnique({
@@ -98,7 +96,7 @@ export class UserService {
       // Merge existing data with new data
       const updatedUser = {
         ...currentUser.profile,
-        ...user.profile ?? {}, // Ensure user.profile is not undefined
+        ...(user.profile ?? {}), // Ensure user.profile is not undefined
       };
 
       // Update user with new data
@@ -151,6 +149,39 @@ export class QuestionService {
     } catch (error: unknown) {
       logger.error('Error fetching question by id:', error);
       throw new Error('Failed to fetch question by id');
+    }
+  }
+}
+
+export class InterviewService {
+  static async createSession(sessionData: {
+    userId: string;
+    jobRole: string;
+    jobLevel: string;
+    interviewType: string;
+    totalQuestions: number;
+    startedAt: Date;
+  }) {
+    try {
+      const interview = await prisma.interview.create({
+        data: {
+          userId: sessionData.userId,
+          date: sessionData.startedAt,
+          score: 0, // Will be updated at the end
+          improvements: [],
+          interviewType: sessionData.interviewType,
+          // Store additional session data in metadata
+          metadata: {
+            jobRole: sessionData.jobRole,
+            jobLevel: sessionData.jobLevel,
+            totalQuestions: sessionData.totalQuestions
+          }
+        }
+      });
+      return interview;
+    } catch (error) {
+      logger.error('Error creating interview session:', error);
+      throw new Error('Failed to create interview session');
     }
   }
 }
