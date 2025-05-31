@@ -21,18 +21,24 @@ const errorHandler = (error: Error, req: Request, res: Response, next: NextFunct
             }
         }
     });
-
-    // send sanitized reponse to client
-    if(error instanceof BaseError) {
-        res.status(error.statusCode).json(error.toJSON());
+    try {
+        // send sanitized reponse to client
+        if(error instanceof BaseError) {
+            res.status(error.statusCode).json(error.toJSON());
     } else {
         // for unknown errors
         res.status(500).json({
             status: 'Error',
             message: 'An unexpected error occured',
-            code: 'INTERNAL_ERROR',
-        })
+                code: 'INTERNAL_ERROR',
+            })
+        }
+    } catch (responseError) {
+        logger.error('Failed to send error response: ', responseError);
+        if (!res.headersSent) {
+            res.status(500).end("Internal Server Error");
+        }
     }
-}
+};
 
 export default errorHandler;
