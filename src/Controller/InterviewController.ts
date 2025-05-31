@@ -98,7 +98,7 @@ export const submitUserResponse = async (req: AuthRequest, res: Response) => {
     const { sessionId, questionId, answerResponse, currentQuestionIndex } = req.body;
 
     // Validate required fields
-    if (!sessionId || !questionId || !answerResponse || !currentQuestionIndex) {
+    if (!sessionId || !questionId || !answerResponse || typeof currentQuestionIndex !== 'number') {
       res
         .status(400)
         .json({ error: 'Missing required fields: sessionId, questionId, answerResponse, currentQuestionIndex' });
