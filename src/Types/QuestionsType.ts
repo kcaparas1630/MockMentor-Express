@@ -21,13 +21,7 @@ export interface InterviewQuestion {
     answer: string;
     questionType: string;
 }
-export interface CompletedInterviewQuestion {
-    id: string;
-    interviewId: string;
-    questionId: string;
-    questionText: string;
-    answer: string;
-    questionType: string;
+export interface CompletedInterviewQuestion extends InterviewQuestion {
     feedback: JsonValue;
     answeredAt: Date;
 }
