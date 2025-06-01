@@ -9,6 +9,7 @@ export type FirebaseAuthErrorCode =
   | 'auth/password-does-not-meet-requirements'
   | 'auth/too-many-requests'
   | 'auth/id-token-expired'
+  | 'auth/invalid-id-token'
   | 'auth/popup-closed-by-user';
 
 class FirebaseAuthError extends BaseError {
@@ -25,6 +26,7 @@ class FirebaseAuthError extends BaseError {
                 return 400; // Bad Request
             case 'auth/wrong-password':
             case 'auth/id-token-expired':
+            case 'auth/invalid-id-token':
                 return 401; // Unauthorized
             case 'auth/user-not-found':
                 return 404; // Not Found
@@ -67,6 +69,11 @@ class FirebaseAuthError extends BaseError {
     static idTokenExpired(message: string = 'The Firebase ID token has expired.') {
         return new FirebaseAuthError(message, 'auth/id-token-expired');
     }
+
+    static invalidIdToken(message: string = 'The Firebase ID token is invalid.') {
+        return new FirebaseAuthError(message, 'auth/invalid-id-token');
+    }
+
 
     static popupClosedByUser(message: string = 'The popup was closed by the user before completing the sign in.') {
         return new FirebaseAuthError(message, 'auth/popup-closed-by-user');
