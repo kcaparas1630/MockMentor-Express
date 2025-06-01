@@ -14,12 +14,8 @@ export const getUserController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const uid = req.user?.uid;
-
-    // validate if uid is provided - a bit extra since middleware should have already checked this. But typescript is complaining otherwise.
-    if (!uid) {
-      return next(FirebaseAuthError.invalidIdToken());
-    }
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
 
     const user = await getUserFromFirebaseToken(uid);
 
@@ -89,11 +85,8 @@ export const updateUserController = async (req: AuthRequest, res: Response, next
       return next(FirebaseAuthError.invalidEmail());
     }
     
-    const uid = req.user?.uid;
-    // validate if uid is provided - a bit extra since middleware should have already checked this. But typescript is complaining otherwise.
-    if (!uid) {
-      return next(FirebaseAuthError.invalidIdToken());
-    }
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
     // validate if user exists
     const user = await getUserFromFirebaseToken(uid);
     if (!user) {
