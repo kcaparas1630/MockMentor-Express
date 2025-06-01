@@ -1,7 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { getUserFromFirebaseToken, createUser, updateUser, checkIfUserExists } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
-import logger from '../Config/LoggerConfig';
 import DatabaseError from '../ErrorHandlers/DatabaseError';
 import ErrorLogger from '../Helper/LoggerFunc';
 import ValidationError from '../ErrorHandlers/ValidationError';
@@ -77,18 +76,39 @@ export const createUserController = async (
   }
 };
 
-export const updateUserController = async (req: AuthRequest, res: Response): Promise<void> => {
-  let uid: string | undefined;
+export const updateUserController = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    uid = req.user?.uid;
-    if (!uid) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+    const { name, email, jobRole} = req.body;
+    // validate that at least one field is provided for update
+    if (!name && !email && !jobRole) {
+      return next(new ValidationError('At least one field (name, email, or jobRole) is required for update'));
     }
-    const user = await updateUser(uid, req.body);
-    res.json(user);
+    
+    // validate email format if email is being updated
+    if (email && !isEmailValid(email)) {
+      return next(FirebaseAuthError.invalidEmail());
+    }
+    
+    const uid = req.user?.uid;
+    // validate if uid is provided - a bit extra since middleware should have already checked this. But typescript is complaining otherwise.
+    if (!uid) {
+      return next(FirebaseAuthError.invalidIdToken());
+    }
+    // validate if user exists
+    const user = await getUserFromFirebaseToken(uid);
+    if (!user) {
+      return next(FirebaseAuthError.userNotFound());
+    }
+    // update user
+    const updatedUser = await updateUser(uid, req.body);
+    res.json(updatedUser);
   } catch (error) {
-    logger.error(`Error updating user for uid ${uid}`, error);
-    res.status(500).json({ error: 'Failed to update user' });
+    ErrorLogger(error, 'updateUser');
+    // if the error is a firebase auth error, return the error
+    if (error instanceof FirebaseAuthError) {
+      return next(error);
+    }
+    // if the error is not a firebase auth error, return a database error
+    next(new DatabaseError('Failed to update user', error));
   }
 };
