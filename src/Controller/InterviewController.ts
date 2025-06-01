@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import {
   getAllQuestions,
   getUserFromFirebaseToken,
@@ -15,6 +15,12 @@ import {
 import { AuthRequest } from '../Types/AuthRequest';
 import logger from '../Config/LoggerConfig';
 import { CompletedInterviewQuestion, InterviewQuestion } from '../Types/QuestionsType';
+import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
+import ValidationError from '../ErrorHandlers/ValidationError';
+import DatabaseError from '../ErrorHandlers/DatabaseError';
+import UnknownError from '../ErrorHandlers/UnknownError';
+import ErrorLogger from '../Helper/ErrorLogger';
+import NotFoundError from '../ErrorHandlers/NotFoundError';
 
 /**
  * Start a new interview session for the authenticated user
@@ -23,38 +29,31 @@ import { CompletedInterviewQuestion, InterviewQuestion } from '../Types/Question
  * @returns JSON response with session details and first question
  * @description Creates a new interview session, validates user profile, and returns the first question
  */
-export const startInterview = async (req: AuthRequest, res: Response) => {
+export const startInterview = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
 
     // Get user data including job role
     const user = await getUserFromFirebaseToken(uid);
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
+      return next(FirebaseAuthError.userNotFound());
     }
 
     const jobRole = user?.profile?.jobRole;
     if (!jobRole) {
-      res.status(400).json({ error: 'User job role not found. Please complete your profile.' });
-      return;
+      return next(new DatabaseError('User job role not found. Please complete your profile.'));
     }
 
     // Get all questions for the interview
     const questions = await getAllQuestions();
     if (!questions || questions.length === 0) {
-      res.status(404).json({ error: 'No questions available' });
-      return;
+      return next(new DatabaseError('No questions available'));
     }
     // TODO: Validate job levels and interview type. Restrict to only certain values.
     const { jobLevel, interviewType } = req.body;
     if (!jobLevel || !interviewType) {
-      res.status(400).json({ error: 'Missing required fields: jobLevel, interviewType' });
-      return;
+      return next(new ValidationError('Missing required fields: jobLevel, interviewType'));
     }
 
     // Create interview session in database
@@ -75,8 +74,15 @@ export const startInterview = async (req: AuthRequest, res: Response) => {
       jobRole: jobRole,
     });
   } catch (error) {
-    logger.error('Error starting interview:', error);
-    res.status(500).json({ error: 'Failed to start interview' });
+    ErrorLogger(error, 'startInterview');
+    // If the error is a known error type, pass it through
+    if (error instanceof FirebaseAuthError || 
+        error instanceof ValidationError || 
+        error instanceof DatabaseError) {
+      return next(error);
+    }
+    // For unknown errors, use a generic server error
+    return next(new UnknownError('Failed to start interview'));
   }
 };
 
@@ -89,12 +95,6 @@ export const startInterview = async (req: AuthRequest, res: Response) => {
  */
 export const submitUserResponse = async (req: AuthRequest, res: Response) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
     const { sessionId, questionId, answerResponse, currentQuestionIndex } = req.body;
 
     // Validate required fields
@@ -223,20 +223,16 @@ export const submitUserResponse = async (req: AuthRequest, res: Response) => {
  * @returns JSON response with complete interview data including score, feedback, and questions
  * @description Fetches detailed interview results including AI-generated feedback and improvements
  */
-export const getInterviewResults = async (req: AuthRequest, res: Response) => {
+export const getInterviewResults = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
 
     const { sessionId } = req.params;
     const interview = await getInterviewWithResults(sessionId);
 
     if (!interview) {
-      res.status(404).json({ error: 'Interview not found' });
-      return;
+      return next(new NotFoundError('Interview not found'));
     }
 
     // Verify user owns this interview
