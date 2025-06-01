@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { getUserFromFirebaseToken, createUser, updateUser, checkIfUserExists } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 import DatabaseError from '../ErrorHandlers/DatabaseError';
-import ErrorLogger from '../Helper/LoggerFunc';
+import ErrorLogger from '../Helper/ErrorLogger';
 import ValidationError from '../ErrorHandlers/ValidationError';
 import isPasswordValid from '../Helper/IsPasswordValid';
 import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';

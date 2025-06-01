@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { getAllQuestions, getQuestionById } from '../db';
-import ErrorLogger from '../Helper/LoggerFunc';
+import ErrorLogger from '../Helper/ErrorLogger';
 import DatabaseError from '../ErrorHandlers/DatabaseError';
 import NotFoundError from '../ErrorHandlers/NotFoundError';
 import ValidationError from '../ErrorHandlers/ValidationError';
