@@ -13,7 +13,29 @@ export type FirebaseAuthErrorCode =
 
 class FirebaseAuthError extends BaseError {
     constructor(message: string, firebaseErrorCode: FirebaseAuthErrorCode, details?: unknown) {
-        super(message, 400, firebaseErrorCode, details);
+        const statusCode = FirebaseAuthError.getStatusCodeForFirebaseError(firebaseErrorCode);
+        super(message, statusCode, firebaseErrorCode, details);
+    }
+
+    private static getStatusCodeForFirebaseError(errorCode: FirebaseAuthErrorCode): number {
+        switch (errorCode) {
+            case 'auth/invalid-email':
+            case 'auth/password-does-not-meet-requirements':
+            case 'auth/popup-closed-by-user':
+                return 400; // Bad Request
+            case 'auth/wrong-password':
+            case 'auth/id-token-expired':
+                return 401; // Unauthorized
+            case 'auth/user-not-found':
+                return 404; // Not Found
+            case 'auth/email-already-in-use':
+                return 409; // Conflict
+            case 'auth/too-many-requests':
+                return 429; // Too Many Requests
+           
+            default:
+                return 500; // Internal Server Error
+        }
     }
 
     // Static factory methods for common Firebase errors
