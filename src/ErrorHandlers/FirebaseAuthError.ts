@@ -6,7 +6,7 @@ export type FirebaseAuthErrorCode =
   | 'auth/user-not-found'
   | 'auth/wrong-password'
   | 'auth/email-already-in-use'
-  | 'auth/password-does-not-meet-requirements'
+  | 'auth/weak-password'
   | 'auth/too-many-requests'
   | 'auth/id-token-expired'
   | 'auth/invalid-id-token'
@@ -21,7 +21,7 @@ class FirebaseAuthError extends BaseError {
     private static getStatusCodeForFirebaseError(errorCode: FirebaseAuthErrorCode): number {
         switch (errorCode) {
             case 'auth/invalid-email':
-            case 'auth/password-does-not-meet-requirements':
+            case 'auth/weak-password':
             case 'auth/popup-closed-by-user':
                 return 400; // Bad Request
             case 'auth/wrong-password':
@@ -59,7 +59,7 @@ class FirebaseAuthError extends BaseError {
 
 
     static passwordDoesNotMeetRequirements(message: string = 'Password must:\n• Contain at least 8 characters\n• Include an uppercase character\n• Include a numeric character\n• Include a special character') {
-        return new FirebaseAuthError(message, 'auth/password-does-not-meet-requirements');
+        return new FirebaseAuthError(message, 'auth/weak-password');
     }
 
     static tooManyRequests(message: string = 'Too many requests. Try again later.') {
