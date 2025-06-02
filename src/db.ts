@@ -4,6 +4,9 @@ import * as admin from 'firebase-admin';
 import logger from './Config/LoggerConfig';
 import { ProfileData, UserUpdateRequest } from './Types/UserProfile';
 import { QuestionFeedback } from './Types/QuestionsType';
+import ErrorLogger from './Helper/ErrorLogger';
+import DatabaseError from './ErrorHandlers/DatabaseError';
+import FirebaseAuthError from './ErrorHandlers/FirebaseAuthError';
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
@@ -33,10 +36,16 @@ export const getUserFromFirebaseToken = async (uid: string) => {
         firebaseUid: uid,
       },
     });
+    if (!user) {
+      throw FirebaseAuthError.userNotFound();
+    }
     return user;
   } catch (error: unknown) {
-    logger.error('Error fetching user from firebase token:', error);
-    throw new Error('Failed to fetch user from firebase token');
+    if (error instanceof FirebaseAuthError) {
+      throw error;
+    }
+    ErrorLogger(error, 'getUserFromFirebaseToken');
+    throw new DatabaseError('Failed to fetch user from firebase token');
   }
 };
 
