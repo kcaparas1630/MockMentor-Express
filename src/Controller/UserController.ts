@@ -16,21 +16,10 @@ export const getUserController = async (
   try {
     // Non-null assertion since middleware guarantees this
     const uid = req.user!.uid;
-
     const user = await getUserFromFirebaseToken(uid);
-
-    if (!user) {
-      return next(FirebaseAuthError.userNotFound());
-    }
     res.json(user);
   } catch (error) {
-    ErrorLogger(error, 'getUser');
-    // if the error is a firebase auth error, return the error
-    if (error instanceof FirebaseAuthError) {
-      return next(error);
-    }
-    // if the error is not a firebase auth error, return a database error
-    next(new DatabaseError('Failed to fetch user', error));
+    next(error);
   }
 };
 
