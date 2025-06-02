@@ -50,31 +50,6 @@ export const getUserFromFirebaseToken = async (uid: string) => {
 };
 
 /**
- * Check if a user exists in the database by email
- * @param email - The email address to check
- * @returns Promise<boolean> - True if user exists, false otherwise
- * @throws Error if database query fails
- * @example
- * const userExists = await UserService.checkIfUserExists("user@example.com");
- * // Returns: true if user exists, false otherwise
- */
-export const checkIfUserExists = async (email: string) => {
-  const user = await prisma.user.findFirst({
-    where: {
-      profile: {
-        is: {
-          email,
-        },
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-  return !!user;
-};
-
-/**
  * Create a new user account in both Firebase Auth and local database
  * @param user - ProfileData containing user information (email, password, displayName, jobRole)
  * @returns Promise<User> - Created user object with database ID and profile
@@ -99,7 +74,7 @@ export const createUser = async (user: ProfileData) => {
       },
     });
     if (existingUser) {
-      throw new Error('User already exists');
+      throw FirebaseAuthError.emailAlreadyInUse();
     }
     // Create Firebase user
     const firebaseUser = await admin.auth().createUser({
@@ -120,8 +95,11 @@ export const createUser = async (user: ProfileData) => {
     });
     return newUser;
   } catch (error: unknown) {
-    logger.error('Error creating user:', error);
-    throw new Error('Failed to create user');
+    if (error instanceof FirebaseAuthError) {
+      throw error;
+    }
+    ErrorLogger(error, 'createUser');
+    throw new DatabaseError('Failed to create user');
   }
 };
 

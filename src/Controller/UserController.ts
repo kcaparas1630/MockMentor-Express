@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { getUserFromFirebaseToken, createUser, updateUser, checkIfUserExists } from '../db';
+import { getUserFromFirebaseToken, createUser, updateUser } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 import DatabaseError from '../ErrorHandlers/DatabaseError';
 import ErrorLogger from '../Helper/ErrorLogger';
@@ -42,22 +42,11 @@ export const createUserController = async (
     if (!isEmailValid(email)) {
       return next(FirebaseAuthError.invalidEmail());
     }
-    // validate if user already exists
-    const userExists = await checkIfUserExists(email);
-    if (userExists) {
-      return next(FirebaseAuthError.emailAlreadyInUse());
-    }
     // create user in firebase auth
     const user = await createUser(req.body);
     res.status(201).json(user);
   } catch (error) {
-    ErrorLogger(error, 'createUser');
-    // if the error is a firebase auth error, return the error
-    if (error instanceof FirebaseAuthError) {
-      return next(error);
-    }
-    // if the error is not a firebase auth error, return a database error
-    next(new DatabaseError('Failed to create user', error));
+    next(error);
   }
 };
 
