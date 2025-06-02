@@ -40,6 +40,15 @@ export const getUserFromFirebaseToken = async (uid: string) => {
   }
 };
 
+/**
+ * Check if a user exists in the database by email
+ * @param email - The email address to check
+ * @returns Promise<boolean> - True if user exists, false otherwise
+ * @throws Error if database query fails
+ * @example
+ * const userExists = await UserService.checkIfUserExists("user@example.com");
+ * // Returns: true if user exists, false otherwise
+ */
 export const checkIfUserExists = async (email: string) => {
   const user = await prisma.user.findFirst({
     where: {
