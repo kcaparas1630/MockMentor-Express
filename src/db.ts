@@ -37,13 +37,10 @@ export const getUserFromFirebaseToken = async (uid: string) => {
       },
     });
     if (!user) {
-      throw FirebaseAuthError.userNotFound();
+      throw new DatabaseError('User not found in database');
     }
     return user;
   } catch (error: unknown) {
-    if (error instanceof FirebaseAuthError) {
-      throw error;
-    }
     ErrorLogger(error, 'getUserFromFirebaseToken');
     throw new DatabaseError('Failed to fetch user from firebase token');
   }
