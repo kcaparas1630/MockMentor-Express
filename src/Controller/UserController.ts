@@ -1,8 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { getUserFromFirebaseToken, createUser, updateUser } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
-import DatabaseError from '../ErrorHandlers/DatabaseError';
-import ErrorLogger from '../Helper/ErrorLogger';
 import ValidationError from '../ErrorHandlers/ValidationError';
 import isPasswordValid from '../Helper/IsPasswordValid';
 import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
@@ -65,21 +63,10 @@ export const updateUserController = async (req: AuthRequest, res: Response, next
     
     // Non-null assertion since middleware guarantees this
     const uid = req.user!.uid;
-    // validate if user exists
-    const user = await getUserFromFirebaseToken(uid);
-    if (!user) {
-      return next(FirebaseAuthError.userNotFound());
-    }
     // update user
     const updatedUser = await updateUser(uid, req.body);
     res.json(updatedUser);
   } catch (error) {
-    ErrorLogger(error, 'updateUser');
-    // if the error is a firebase auth error, return the error
-    if (error instanceof FirebaseAuthError) {
-      return next(error);
-    }
-    // if the error is not a firebase auth error, return a database error
-    next(new DatabaseError('Failed to update user', error));
+    next(error);
   }
 };

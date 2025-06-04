@@ -42,6 +42,9 @@ export const getUserFromFirebaseToken = async (uid: string) => {
     }
     return user;
   } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
     ErrorLogger(error, 'getUserFromFirebaseToken');
     throw new DatabaseError('Failed to fetch user from firebase token');
   }
@@ -121,7 +124,7 @@ export const updateUser = async (uid: string, user: UserUpdateRequest) => {
 
     // If user not found, throw error
     if (!currentUser) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     // Merge existing data with new data
@@ -139,8 +142,11 @@ export const updateUser = async (uid: string, user: UserUpdateRequest) => {
     });
     return updateUser;
   } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
     logger.error('Error updating user:', error);
-    throw new Error('Failed to update user');
+    throw new DatabaseError('Failed to update user');
   }
 };
 
