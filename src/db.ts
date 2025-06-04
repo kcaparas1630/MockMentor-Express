@@ -6,7 +6,8 @@ import { ProfileData, UserUpdateRequest } from './Types/UserProfile';
 import { QuestionFeedback } from './Types/QuestionsType';
 import ErrorLogger from './Helper/ErrorLogger';
 import DatabaseError from './ErrorHandlers/DatabaseError';
-import FirebaseAuthError from './ErrorHandlers/FirebaseAuthError';
+import ConflictError from './ErrorHandlers/ConflictError';
+import NotFoundError from './ErrorHandlers/NotFoundError';
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
@@ -37,7 +38,7 @@ export const getUserFromFirebaseToken = async (uid: string) => {
       },
     });
     if (!user) {
-      throw new DatabaseError('User not found in database');
+      throw new NotFoundError('User not found in database');
     }
     return user;
   } catch (error: unknown) {
@@ -71,7 +72,7 @@ export const createUser = async (user: ProfileData) => {
       },
     });
     if (existingUser) {
-      throw FirebaseAuthError.emailAlreadyInUse();
+      throw new ConflictError('Email already exists');
     }
     // Create Firebase user
     const firebaseUser = await admin.auth().createUser({
@@ -92,8 +93,8 @@ export const createUser = async (user: ProfileData) => {
     });
     return newUser;
   } catch (error: unknown) {
-    if (error instanceof FirebaseAuthError) {
-      throw error;
+    if (error instanceof ConflictError) {
+      throw error; // Re-throw conflict errors (like email already exists)
     }
     ErrorLogger(error, 'createUser');
     throw new DatabaseError('Failed to create user');
