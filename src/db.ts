@@ -145,7 +145,7 @@ export const updateUser = async (uid: string, user: UserUpdateRequest) => {
     if (error instanceof NotFoundError) {
       throw error;
     }
-    logger.error('Error updating user:', error);
+    ErrorLogger(error, 'updateUser');
     throw new DatabaseError('Failed to update user');
   }
 };
@@ -161,10 +161,16 @@ export const updateUser = async (uid: string, user: UserUpdateRequest) => {
 export const getAllQuestions = async () => {
   try {
     const questions = await prisma.question.findMany();
+    if (!questions) {
+      throw new NotFoundError('No questions found');
+    }
     return questions;
   } catch (error: unknown) {
-    logger.error('Error fetching questions:', error);
-    throw new Error('Failed to fetch questions');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'getAllQuestions');
+    throw new DatabaseError('Failed to fetch questions');
   }
 };
 
@@ -185,13 +191,15 @@ export const getQuestionById = async (id: string) => {
       },
     });
     if (!question) {
-      logger.error('Question not found');
-      throw new Error('Question not found');
+      throw new NotFoundError('Question not found');
     }
     return question;
   } catch (error: unknown) {
-    logger.error('Error fetching question by id:', error);
-    throw new Error('Failed to fetch question by id');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'getQuestionById');
+    throw new DatabaseError('Failed to fetch question by id');
   }
 };
 
