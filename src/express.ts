@@ -8,7 +8,7 @@ import cors from 'cors';
 import logger from './Config/LoggerConfig';
 import rateLimit from 'express-rate-limit';
 import { userRoutes, questionRoutes, interviewRoutes } from './Routes/index';
-
+import errorHandler from './ErrorHandlers/ErrorHandler';
 const app = express();
 const morganFormat = ':method :url :status :response-time ms';
 
@@ -46,5 +46,7 @@ app.use('/api', userRoutes);
 app.use('/api', questionRoutes);
 app.use('/api', interviewRoutes);
 
+// Error handling middleware
+app.use(errorHandler);
 
 export default app;
