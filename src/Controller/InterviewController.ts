@@ -18,7 +18,6 @@ import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
 import ValidationError from '../ErrorHandlers/ValidationError';
 import DatabaseError from '../ErrorHandlers/DatabaseError';
 import UnknownError from '../ErrorHandlers/UnknownError';
-import ErrorLogger from '../Helper/ErrorLogger';
 import NotFoundError from '../ErrorHandlers/NotFoundError';
 import ForbiddenError from '../ErrorHandlers/ForbiddenError';
 
@@ -47,9 +46,7 @@ export const startInterview = async (req: AuthRequest, res: Response, next: Next
 
     // Get all questions for the interview
     const questions = await getAllQuestions();
-    if (!questions || questions.length === 0) {
-      return next(new DatabaseError('No questions available'));
-    }
+  
     // TODO: Validate job levels and interview type. Restrict to only certain values.
     const { jobLevel, interviewType } = req.body;
     if (!jobLevel) {
@@ -77,11 +74,11 @@ export const startInterview = async (req: AuthRequest, res: Response, next: Next
       jobRole: jobRole,
     });
   } catch (error) {
-    ErrorLogger(error, 'startInterview');
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
-        error instanceof DatabaseError) {
+        error instanceof DatabaseError ||
+        error instanceof NotFoundError) {
       return next(error);
     }
     // For unknown errors, use a generic server error
@@ -120,15 +117,9 @@ export const submitUserResponse = async (req: AuthRequest, res: Response, next: 
 
     // Get interview session
     const session = await getSession(sessionId);
-    if (!session) {
-      return next(new NotFoundError('Interview session not found'));
-    }
 
     // Get the question details
     const question = await getQuestionById(questionId);
-    if (!question) {
-      return next(new NotFoundError('Question not found'));
-    }
 
     // Validate this is the expected question for the current index.
     const allQuestionsValidated = await getAllQuestions();
@@ -215,7 +206,6 @@ export const submitUserResponse = async (req: AuthRequest, res: Response, next: 
       currentQuestionFeedback: questionFeedback, // Feedback for the question just answered
     });
   } catch (error) {
-    ErrorLogger(error, 'submitUserResponse');
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
@@ -247,10 +237,6 @@ export const getInterviewResults = async (req: AuthRequest, res: Response, next:
 
     const interview = await getInterviewWithResults(sessionId);
 
-    if (!interview) {
-      return next(new NotFoundError('Interview not found'));
-    }
-
     // Verify user owns this interview
     const user = await getUserFromFirebaseToken(uid);
     if (!user || interview.userId !== user.id) {
@@ -268,7 +254,6 @@ export const getInterviewResults = async (req: AuthRequest, res: Response, next:
       },
     });
   } catch (error) {
-    ErrorLogger(error, 'getInterviewResults');
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
@@ -319,11 +304,11 @@ export const getQuestionByIndex = async (req: AuthRequest, res: Response, next: 
       questionIndex: index,
     });
   } catch (error) {
-    ErrorLogger(error, 'getQuestionByIndex');
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
-        error instanceof DatabaseError) {
+        error instanceof DatabaseError ||
+        error instanceof NotFoundError) {
       return next(error);
     }
     // For unknown errors, use a generic server error

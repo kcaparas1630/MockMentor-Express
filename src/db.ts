@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { FirebaseDatabaseError } from 'firebase-admin/lib/utils/error';
 import * as admin from 'firebase-admin';
-import logger from './Config/LoggerConfig';
 import { ProfileData, UserUpdateRequest } from './Types/UserProfile';
 import { QuestionFeedback } from './Types/QuestionsType';
 import ErrorLogger from './Helper/ErrorLogger';
@@ -250,8 +249,8 @@ export const createSession = async (sessionData: {
     });
     return interview;
   } catch (error) {
-    logger.error('Error creating interview session:', error);
-    throw new Error('Failed to create interview session');
+    ErrorLogger(error, 'createSession');
+    throw new DatabaseError('Failed to create interview session');
   }
 };
 
@@ -272,10 +271,16 @@ export const getSession = async (sessionId: string) => {
         questions: true,
       },
     });
+    if (!interview) {
+      throw new NotFoundError('Interview session not found');
+    }
     return interview;
   } catch (error) {
-    logger.error('Error getting interview session:', error);
-    throw new Error('Failed to get interview session');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'getSession');
+    throw new DatabaseError('Failed to get interview session');
   }
 };
 
@@ -310,6 +315,10 @@ export const saveAnswer = async (
       where: { id: questionId },
     });
 
+    if (!question) {
+      throw new NotFoundError('Question not found');
+    }
+
     await prisma.interviewQuestion.create({
       data: {
         interviewId: sessionId,
@@ -322,8 +331,11 @@ export const saveAnswer = async (
       },
     });
   } catch (error) {
-    logger.error('Error saving answer:', error);
-    throw new Error('Failed to save answer');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'saveAnswer');
+    throw new DatabaseError('Failed to save answer');
   }
 };
 
@@ -346,7 +358,7 @@ export const completeInterview = async (sessionId: string) => {
     });
 
     if (!interview) {
-      throw new Error('Interview not found');
+      throw new NotFoundError('Interview not found');
     }
 
     // Calculate duration
@@ -362,8 +374,11 @@ export const completeInterview = async (sessionId: string) => {
 
     return interview;
   } catch (error) {
-    logger.error('Error completing interview:', error);
-    throw new Error('Failed to complete interview');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'completeInterview');
+    throw new DatabaseError('Failed to complete interview');
   }
 };
 
@@ -401,8 +416,8 @@ export const updateInterviewFeedback = async (
       },
     });
   } catch (error) {
-    logger.error('Error updating interview feedback:', error);
-    throw new Error('Failed to update interview feedback');
+    ErrorLogger(error, 'updateInterviewFeedback');
+    throw new DatabaseError('Failed to update interview feedback');
   }
 };
 
@@ -423,10 +438,16 @@ export const getInterviewWithResults = async (sessionId: string) => {
         questions: true,
       },
     });
+    if (!interview) {
+      throw new NotFoundError('Interview not found');
+    }
     return interview;
   } catch (error) {
-    logger.error('Error getting interview results:', error);
-    throw new Error('Failed to get interview results');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'getInterviewWithResults');
+    throw new DatabaseError('Failed to get interview results');
   }
 };
 
@@ -462,8 +483,7 @@ export const processAnswer = async (data: {
 }) => {
   try {
     if (!process.env.PYTHON_API_URL) {
-      logger.error('PYTHON_API_URL is not set');
-      throw new Error('PYTHON_API_URL is not set');
+      throw new NotFoundError('PYTHON_API_URL is not set');
     }
     // Make REST API call to AI microservice
     const response = await fetch(`${process.env.PYTHON_API_URL}/interview-feedback`, {
@@ -482,14 +502,17 @@ export const processAnswer = async (data: {
     });
 
     if (!response.ok) {
-      throw new Error(`AI service responded with status: ${response.status}`);
+      throw new Error(`External AI service unavailable (HTTP ${response.status})`);
     }
 
     const responseData = await response.json();
     return responseData; // Return the AI service response directly
   } catch (error) {
-    logger.error('Error processing individual answer:', error);
-    throw new Error('Failed to process individual answer feedback');
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    ErrorLogger(error, 'processAnswer');
+    throw new DatabaseError('Failed to process individual answer feedback');
   }
 };
 
@@ -545,7 +568,7 @@ export const processAllAnswers = async (data: {
       })),
     };
   } catch (error) {
-    logger.error('Error processing all answers:', error);
-    throw new Error('Failed to process comprehensive feedback');
+    ErrorLogger(error, 'processAllAnswers');
+    throw new DatabaseError('Failed to process comprehensive feedback');
   }
 };
