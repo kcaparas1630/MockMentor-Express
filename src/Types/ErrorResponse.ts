@@ -1,7 +1,8 @@
 interface ErrorResponse {
-    status: string;
+    statusCode: number;
     message: string;
-    code?: string;
+    errorCode?: string;
+    details?: unknown;
 }
 
 export default ErrorResponse;

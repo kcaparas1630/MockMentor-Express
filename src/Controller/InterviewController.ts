@@ -209,7 +209,8 @@ export const submitUserResponse = async (req: AuthRequest, res: Response, next: 
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
-        error instanceof DatabaseError) {
+        error instanceof DatabaseError ||
+        error instanceof NotFoundError) {
       return next(error);
     }
     // For unknown errors, use a generic server error
@@ -257,7 +258,9 @@ export const getInterviewResults = async (req: AuthRequest, res: Response, next:
     // If the error is a known error type, pass it through
     if (error instanceof FirebaseAuthError || 
         error instanceof ValidationError || 
-        error instanceof DatabaseError) {
+        error instanceof DatabaseError ||
+        error instanceof NotFoundError ||
+        error instanceof ForbiddenError) {
       return next(error);
     }
     // For unknown errors, use a generic server error
@@ -289,7 +292,10 @@ export const getQuestionByIndex = async (req: AuthRequest, res: Response, next: 
       return next(new ValidationError('Invalid questionIndex'));
     }
 
-    const index = parseInt(questionIndex);
+    const index = parseInt(questionIndex, 10);
+    if (isNaN(index) || index < 0) {
+      return next(new ValidationError('Invalid questionIndex'));
+    }
 
     const questions = await getAllQuestions();
 
