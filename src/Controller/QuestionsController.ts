@@ -1,22 +1,34 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { getAllQuestions, getQuestionById } from '../db';
-import logger from '../Config/LoggerConfig';
-export const getQuestionController = async (req: Request, res: Response) => {
-    try {
-        const question = await getAllQuestions();
-        res.status(200).json(question);
-    } catch (error: unknown) {
-        logger.error('Error fetching questions:', error);
-        res.status(500).json({ error: 'Failed to fetch questions' });
-    }
-}
+import ValidationError from '../ErrorHandlers/ValidationError';
 
-export const getQuestionByIdController = async (req: Request, res: Response) => {
-    try {
-        const question = await getQuestionById(req.params.id);
-        res.status(200).json(question);
-    } catch (error: unknown) {
-        logger.error('Error fetching question by id:', error);
-        res.status(500).json({ error: 'Failed to fetch question by id' });
+export const getQuestionController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const question = await getAllQuestions();
+    res.status(200).json(question);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const getQuestionByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    // check if id is not missing
+    if (!id) {
+        return next(new ValidationError('Question id is required'));
     }
-}
+
+    // get question by id   
+    const question = await getQuestionById(id);
+
+    res.status(200).json(question);
+  } catch (error: unknown) {
+    next(error);
+  }
+};

@@ -15,9 +15,10 @@ class BaseError extends Error {
 
     public toJSON(): ErrorResponse {
         return {
-            status: 'error',
+            statusCode: this.statusCode,
             message: this.message,
-            code: this.errorCode,
+            errorCode: this.errorCode,
+            details: this.details,
         }
     }
 }

@@ -1,56 +1,72 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import { getUserFromFirebaseToken, createUser, updateUser } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
-import logger from '../Config/LoggerConfig';
+import ValidationError from '../ErrorHandlers/ValidationError';
+import isPasswordValid from '../Helper/IsPasswordValid';
+import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
+import isEmailValid from '../Helper/isEmailValid';
 
-export const getUser = async (req: AuthRequest, res: Response): Promise<void> => {
-    let uid: string | undefined;
-    try {
-        uid = req.user?.uid;  
-        if (!uid) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
-        }
-        const user = await getUserFromFirebaseToken(uid);
+export const getUserController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
+    const user = await getUserFromFirebaseToken(uid);
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+};
 
-        if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-        }
-        res.json(user);
-    } catch (error) {
-        logger.error(`Error fetching user for uid ${uid}`, error);
-        res.status(500).json({ error: 'Failed to fetch user' });
-    }
-}
-
-export const createUserController = async (req: AuthRequest, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+export const createUserController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { email, password } = req.body;
+  try {
+    // validate if email and password are provided
     if (!email || !password) {
-        res.status(400).json({ error: 'Email and password are required' });
-        return;
+      return next(new ValidationError('Email and password are required'));
     }
-    try {
-        const user = await createUser(req.body);
-        res.status(201).json(user);
-    } catch (error) {
-        logger.error(`Error creating user`, error);
-        res.status(500).json({ error: 'Failed to create user' });
+    // validate if password meets the required firebase auth password policy
+    if (!isPasswordValid(password)) {
+      return next(FirebaseAuthError.passwordDoesNotMeetRequirements());
     }
-}
+    // validate if email is valid
+    if (!isEmailValid(email)) {
+      return next(FirebaseAuthError.invalidEmail());
+    }
+    // create user in firebase auth
+    const user = await createUser(req.body);
+    res.status(201).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
 
-export const updateUserController = async (req: AuthRequest, res: Response): Promise<void> => {
-    let uid: string | undefined;
-    try {
-        uid = req.user?.uid;
-        if (!uid) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
-        }
-        const user = await updateUser(uid, req.body);
-        res.json(user);
-    } catch (error) {
-        logger.error(`Error updating user for uid ${uid}`, error);
-        res.status(500).json({ error: 'Failed to update user' });
+export const updateUserController = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { name, email, jobRole} = req.body;
+    // validate that at least one field is provided for update
+    if (!name && !email && !jobRole) {
+      return next(new ValidationError('At least one field (name, email, or jobRole) is required for update'));
     }
-}
+    
+    // validate email format if email is being updated
+    if (email && !isEmailValid(email)) {
+      return next(FirebaseAuthError.invalidEmail());
+    }
+    
+    // Non-null assertion since middleware guarantees this
+    const uid = req.user!.uid;
+    // update user
+    const updatedUser = await updateUser(uid, req.body);
+    res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
