@@ -48,19 +48,25 @@ export const createUserController = async (
   }
 };
 
-export const updateUserController = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const updateUserController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const { name, email, jobRole} = req.body;
+    const { name, email, jobRole } = req.body.profile;
     // validate that at least one field is provided for update
     if (!name && !email && !jobRole) {
-      return next(new ValidationError('At least one field (name, email, or jobRole) is required for update'));
+      return next(
+        new ValidationError('At least one field (name, email, or jobRole) is required for update')
+      );
     }
-    
+
     // validate email format if email is being updated
     if (email && !isEmailValid(email)) {
       return next(FirebaseAuthError.invalidEmail());
     }
-    
+
     // Non-null assertion since middleware guarantees this
     const uid = req.user!.uid;
     // update user
