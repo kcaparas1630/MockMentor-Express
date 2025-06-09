@@ -59,4 +59,6 @@ model Question {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   question      String
   questionType  String
+  jobRole       String
+  jobLevel      String
 }
