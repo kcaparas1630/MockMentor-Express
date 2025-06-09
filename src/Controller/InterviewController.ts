@@ -96,6 +96,7 @@ export const startInterview = async (req: AuthRequest, res: Response, next: Next
 export const submitUserResponse = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { sessionId, questionId, answerResponse, currentQuestionIndex } = req.body;
+    console.log('submitUserResponse called with:', { sessionId, questionId, answerResponse, currentQuestionIndex });
 
     // Validate required fields. Separated for better debugging and user experience.
     if (!sessionId) {
@@ -106,9 +107,6 @@ export const submitUserResponse = async (req: AuthRequest, res: Response, next: 
     }
     if (!answerResponse) {
       return next(new ValidationError('Missing required field: answerResponse'));
-    }
-    if (!currentQuestionIndex) {
-      return next(new ValidationError('Missing required field: currentQuestionIndex'));
     }
 
     if (typeof currentQuestionIndex !== 'number' || currentQuestionIndex < 0) {
