@@ -15,6 +15,9 @@ RUN npx prisma generate
 FROM node:20-alpine AS prod
 WORKDIR /app
 
+# Create a non-root user and group
+RUN addgroup -S expressgroup && expressuser -S expressuser -G expressgroup
+
 # Copy only production dependencies
 COPY package*.json ./
 RUN npm ci --only=production --ignore-scripts --prefer-offline
@@ -25,10 +28,17 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
 
+# Change ownership to the non-root user
+RUN chown -R expressuser:expressgroup /app
+
 LABEL maintainer="Kent Caparas<kentcaparas12@gmail.com>"
 LABEL description="Docker image to run Task command line backend"
 LABEL version="1.0"
 
 ENV NODE_ENV=production
 EXPOSE 3000
+
+# Switch to the non-root user
+USER expressuser
+
 CMD ["npm", "run", "serve", "--no-update-notifier", "--max-old-space-size=50"]
