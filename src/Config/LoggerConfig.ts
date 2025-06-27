@@ -5,7 +5,6 @@ import fs from 'fs';
 const { combine, timestamp, json, colorize } = format;
 
 // Define log directory and file
-// eslint-disable-next-line no-undef
 const logDir = path.join(__dirname, '../../logs');
 const logFile = path.join(logDir, 'app.log');
 
