@@ -1,3 +1,18 @@
+/**
+ * @fileoverview Express error handling middleware for API responses and logging.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Centralizes error handling for all API endpoints, logging error details and sending sanitized error responses to clients. Integrates with custom error classes and Winston logger.
+ *
+ * @see {@link ./BaseError}
+ * @see {@link ../Config/LoggerConfig}
+ *
+ * Dependencies:
+ * - Express.js
+ * - Winston logger
+ * - Custom Error Classes
+ */
 import { NextFunction, Request, Response } from "express";
 import BaseError from "./BaseError";
 import logger from "../Config/LoggerConfig";
