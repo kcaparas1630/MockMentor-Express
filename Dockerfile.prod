@@ -8,9 +8,6 @@ RUN npm ci
 COPY . ./
 RUN npm run build
 
-# Run Prisma generate
-RUN npx prisma generate
-
 # Stage 2: Production image
 FROM node:20-alpine AS prod
 WORKDIR /app
@@ -26,6 +23,9 @@ RUN npm ci --only=production --ignore-scripts --prefer-offline
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./
+
+# Generate Prisma client in production image
+RUN npx prisma generate
 
 # Change ownership to the non-root user
 RUN chown -R expressuser:expressgroup /app
