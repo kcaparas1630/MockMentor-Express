@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Type definitions for interview questions and feedback structures.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Provides interfaces for questions, feedback, and interview question data used throughout the application.
+ *
+ * Dependencies:
+ * - None
+ */
 import { JsonValue } from '@prisma/client/runtime/library';
 
 export interface Question {

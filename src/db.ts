@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Database service layer for user, question, and interview session management.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Provides database access and business logic for user profiles, interview questions, sessions, and answers. Integrates with Prisma ORM and Firebase Admin SDK. Handles error logging and robust error propagation for all database operations.
+ *
+ * @see {@link ./Types/UserProfile}
+ * @see {@link ./Types/QuestionsType}
+ * @see {@link ./ErrorHandlers/*}
+ *
+* Dependencies:
+* - Prisma ORM
+* - Firebase Admin SDK
+* - Error Handlers
+*/
 import { PrismaClient } from '@prisma/client';
 import { FirebaseDatabaseError } from 'firebase-admin/lib/utils/error';
 import * as admin from 'firebase-admin';
