@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Express application setup and middleware configuration for AI Interview Express API.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Configures the Express app, middleware, logging, rate limiting, and API route registration. Integrates error handling and security best practices for the backend service.
+ *
+ * @see {@link ./Routes/index}
+ * @see {@link ./Config/LoggerConfig}
+ * @see {@link ./ErrorHandlers/ErrorHandler}
+ *
+ * Dependencies:
+ * - Express.js
+ * - Middleware
+ * - Logger
+ */
 import './firebaseAdmin';
 import './db';
 import express from 'express';

@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Controller for user account management, including retrieval, creation, and update of user profiles.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Provides endpoints for user profile operations, integrating with authentication, validation, and database services. Ensures user data integrity and robust error handling for user-related actions.
+ *
+ * @see {@link ../db}
+ * @see {@link ../Types/UserProfile}
+ * @see {@link ../Types/AuthRequest}
+ *
+ * Dependencies:
+ * - Express.js
+ * - Database Service
+ * - Error Handlers
+ */
 import { Response, NextFunction } from 'express';
 import { getUserFromFirebaseToken, createUser, updateUser } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
@@ -6,6 +22,13 @@ import isPasswordValid from '../Helper/IsPasswordValid';
 import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
 import isEmailValid from '../Helper/isEmailValid';
 
+/**
+ * Retrieves user profile information from Firebase Auth
+ * @param req - The authenticated request object containing user ID
+ * @param res - The response object
+ * @returns JSON response with user profile data
+ * @description Fetches user profile information from Firebase Auth based on the authenticated user's ID
+ */
 export const getUserController = async (
   req: AuthRequest,
   res: Response,
@@ -21,6 +44,13 @@ export const getUserController = async (
   }
 };
 
+/**
+ * Creates a new user account in Firebase Auth
+ * @param req - The request object containing user email and password
+ * @param res - The response object
+ * @returns JSON response with the created user
+ * @description Validates user input, creates a new user in Firebase Auth, and returns the created user
+ */
 export const createUserController = async (
   req: AuthRequest,
   res: Response,
@@ -48,6 +78,13 @@ export const createUserController = async (
   }
 };
 
+/**
+ * Updates user profile information in Firebase Auth
+ * @param req - The authenticated request object containing user ID and profile updates
+ * @param res - The response object
+ * @returns JSON response with the updated user
+ * @description Validates and updates user profile information in Firebase Auth based on the authenticated user's ID
+ */
 export const updateUserController = async (
   req: AuthRequest,
   res: Response,

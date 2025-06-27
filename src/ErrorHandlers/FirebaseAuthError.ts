@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Custom error class for handling Firebase authentication errors.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Defines error codes and static factory methods for common Firebase Auth errors. Integrates with the application's error handling and logging system.
+ *
+ * @see {@link ./BaseError}
+ *
+ * Dependencies:
+ * - BaseError
+ */
 import BaseError from './BaseError';
 
 // Firebase Auth specific error codes (modular - add more as needed)

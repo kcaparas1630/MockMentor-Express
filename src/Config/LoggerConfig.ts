@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Winston logger configuration for application logging.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Sets up and exports a Winston logger instance for structured logging to console and file. Ensures log directory setup and error handling for logging operations.
+ *
+ * @see {@link winston}
+ *
+ * Dependencies:
+ * - winston
+ * - fs
+ * - path
+ */
 import { createLogger, format, transports } from 'winston';
 import path from 'path';
 import fs from 'fs';
@@ -5,7 +19,6 @@ import fs from 'fs';
 const { combine, timestamp, json, colorize } = format;
 
 // Define log directory and file
-// eslint-disable-next-line no-undef
 const logDir = path.join(__dirname, '../../logs');
 const logFile = path.join(logDir, 'app.log');
 

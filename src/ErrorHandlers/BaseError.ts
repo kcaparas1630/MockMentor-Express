@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Base error class for custom application errors with HTTP status codes and error codes.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Provides a foundation for all custom error types, supporting status codes, error codes, and additional details. Integrates with error response serialization for API error handling.
+ *
+ * @see {@link ../Types/ErrorResponse}
+ *
+ * Dependencies:
+ * - ErrorResponse type
+ */
+
 import ErrorResponse from "../Types/ErrorResponse";
 
 class BaseError extends Error {

@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Controller for managing interview sessions, questions, and user responses.
+ * @author kcaparas1630@gmail.com
+ * @version 2024-01-01
+ * @description
+ * Handles the creation, progression, and completion of interview sessions, including question retrieval, answer submission, and feedback processing. Integrates with authentication, validation, and database layers. Ensures robust error handling and session management for the interview flow.
+ *
+ * @see {@link ../db}
+ * @see {@link ../Types/QuestionsType}
+ * @see {@link ../Types/AuthRequest}
+ *
+ * Dependencies:
+ * - Express.js
+ * - Database Service
+ * - Error Handlers
+ */
 import { Response, NextFunction } from 'express';
 import {
   getAllQuestions,
@@ -20,6 +36,8 @@ import DatabaseError from '../ErrorHandlers/DatabaseError';
 import UnknownError from '../ErrorHandlers/UnknownError';
 import NotFoundError from '../ErrorHandlers/NotFoundError';
 import ForbiddenError from '../ErrorHandlers/ForbiddenError';
+
+
 
 /**
  * Start a new interview session for the authenticated user
