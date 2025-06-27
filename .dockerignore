@@ -1,0 +1,39 @@
+# Node modules (should always be excluded)
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Output directories
+dist
+build
+
+# Local env files (unless you want them in the image)
+.env
+.env.*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Version control
+.git
+.gitignore
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# Test, docs, and misc
+test
+tests
+coverage
+docs
+*.md
+*.log
+
+# Secrets (never copy these into images)
+secrets
+secrets.*

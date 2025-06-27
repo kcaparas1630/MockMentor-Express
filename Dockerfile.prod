@@ -1,0 +1,48 @@
+# Stage 1: Build the application
+FROM node:20-alpine AS build
+WORKDIR /app
+
+# Copy files and install dependencies
+COPY package*.json ./
+RUN npm ci
+COPY . ./
+RUN npm run build
+
+# Stage 2: Production image
+FROM node:20-alpine AS prod
+WORKDIR /app
+
+# Create a non-root user and group
+RUN addgroup -S expressgroup && adduser -S expressuser -G expressgroup
+
+# Copy only production dependencies
+COPY package*.json ./
+RUN npm ci --only=production --ignore-scripts --prefer-offline
+
+# Copy built app and necessary files
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/package.json ./
+
+# Generate Prisma client in production image
+RUN npx prisma generate
+
+# Change ownership to the non-root user
+RUN chown -R expressuser:expressgroup /app
+
+LABEL maintainer="Kent Caparas<kentcaparas12@gmail.com>"
+LABEL description="Docker image to run Task command line backend"
+LABEL version="1.0"
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+# Switch to the non-root user
+USER expressuser
+
+# Add healthcheck for /health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+
+CMD ["npm", "run", "serve", "--no-update-notifier", "--max-old-space-size=50"]
