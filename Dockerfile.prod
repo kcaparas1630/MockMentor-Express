@@ -16,7 +16,7 @@ FROM node:20-alpine AS prod
 WORKDIR /app
 
 # Create a non-root user and group
-RUN addgroup -S expressgroup && expressuser -S expressuser -G expressgroup
+RUN addgroup -S expressgroup && adduser -S expressuser -G expressgroup
 
 # Copy only production dependencies
 COPY package*.json ./
