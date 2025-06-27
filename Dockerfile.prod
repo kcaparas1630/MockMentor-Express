@@ -25,7 +25,6 @@ RUN npm ci --only=production --ignore-scripts --prefer-offline
 # Copy built app and necessary files
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
 
 # Change ownership to the non-root user
@@ -40,5 +39,16 @@ EXPOSE 3000
 
 # Switch to the non-root user
 USER expressuser
+
+// ... existing code ...
+EXPOSE 3000
+
+# Switch to the non-root user
+USER expressuser
+
+# Add healthcheck for /health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
 
 CMD ["npm", "run", "serve", "--no-update-notifier", "--max-old-space-size=50"]
