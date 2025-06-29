@@ -47,8 +47,25 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'Pragma'
+  ],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 })); // activate cors. allow access
 app.use(limiter); // limit the number of requests
+
+// Handle preflight requests
+app.options('*', cors());
+
 // Logs using morgan
 app.use(
   morgan(morganFormat, {
