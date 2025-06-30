@@ -28,6 +28,8 @@ import errorHandler from './ErrorHandlers/ErrorHandler';
 const app = express();
 const morganFormat = ':method :url :status :response-time ms';
 
+app.set('trust proxy', 1);
+
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 10, // limit each ip to 10 requests per window/minute
