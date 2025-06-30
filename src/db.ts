@@ -33,7 +33,7 @@ prisma
     return console.log('Connected to MongoDB');
   })
   .catch((error: FirebaseDatabaseError) => {
-    throw new Error(`Database connection error: ${error} `);
+    console.error('Database connection error:', error);
   });
 
 /**

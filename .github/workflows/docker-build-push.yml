@@ -35,7 +35,7 @@ jobs:
         run: sops -d secrets/secrets.enc.yaml > .env
         
       - name: Build Docker image
-        run: docker build -f Dockerfile.prod -t us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest .
+        run: docker build -f Dockerfile.dev -t us-east1-docker.pkg.dev/mockmentor-460805/mockmentor-express-server-dev/mockmentor-express-server-dev:latest .
         
       - name: Push Docker Images
         run: |
