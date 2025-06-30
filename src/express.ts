@@ -33,21 +33,42 @@ const limiter = rateLimit({
   max: 10, // limit each ip to 10 requests per window/minute
 });
 
-const allowedOrigins = ['http://localhost:5173', 'https://mockmentor-frontend-dev-808688308660.us-east1.run.app']
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'https://mockmentor-frontend-dev-808688308660.us-east1.run.app'
+];
+
 // Middleware
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Allow cookies and credentials
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'Pragma'
+  ],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression()); // compressor of body data, improving transfer speed.
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-})); // activate cors. allow access
 app.use(limiter); // limit the number of requests
 // Logs using morgan
 app.use(
