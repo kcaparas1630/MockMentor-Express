@@ -14,11 +14,12 @@
  * - Middleware
  */
 import { Router } from 'express';
-import { createUserController, getUserController, updateUserController } from '../Controller/UserController';
+import { createUserController, getUserController, updateUserController, googleAuthController } from '../Controller/UserController';
 import verifyFirebaseToken from '../Middleware/VerifyFirebaseToken';
 const router = Router();
 
 router.get('/user', verifyFirebaseToken, getUserController);
+router.post('/google', googleAuthController);
 router.post('/create-user', createUserController);
 router.put('/update-user', verifyFirebaseToken, updateUserController);
 

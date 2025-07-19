@@ -120,6 +120,50 @@ export const createUser = async (user: ProfileData) => {
 };
 
 /**
+ * Create a new user account in database for OAuth users (Firebase user already exists)
+ * @param user - ProfileData containing user information and existing Firebase UID
+ * @param firebaseUid - Existing Firebase UID from OAuth provider
+ * @returns Promise<User> - Created user object with database ID and profile
+ * @throws Error if user already exists or database creation fails
+ */
+export const createOAuthUser = async (user: ProfileData, firebaseUid: string) => {
+  try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        profile: {
+          is: {
+            email: user.email ?? '',
+          },
+        },
+      },
+    });
+    if (existingUser) {
+      throw new ConflictError('Email already exists');
+    }
+    
+    // Create user in database with existing Firebase UID
+    const newUser = await prisma.user.create({
+      data: {
+        firebaseUid: firebaseUid,
+        profile: {
+          name: user.name ?? '',
+          email: user.email ?? '',
+          jobRole: user.jobRole ?? '',
+          lastLogin: new Date(),
+        },
+      },
+    });
+    return newUser;
+  } catch (error: unknown) {
+    if (error instanceof ConflictError) {
+      throw error;
+    }
+    ErrorLogger(error, 'createOAuthUser');
+    throw new DatabaseError('Failed to create OAuth user');
+  }
+};
+
+/**
  * Update existing user profile information
  * @param uid - Firebase user identifier
  * @param user - UserUpdateRequest containing fields to update

@@ -15,12 +15,15 @@
  * - Error Handlers
  */
 import { Response, NextFunction } from 'express';
-import { getUserFromFirebaseToken, createUser, updateUser } from '../db';
+import { getUserFromFirebaseToken, createUser, updateUser, createOAuthUser } from '../db';
 import { AuthRequest } from '../Types/AuthRequest';
 import ValidationError from '../ErrorHandlers/ValidationError';
 import isPasswordValid from '../Helper/IsPasswordValid';
 import FirebaseAuthError from '../ErrorHandlers/FirebaseAuthError';
 import isEmailValid from '../Helper/isEmailValid';
+import NotFoundError from '../ErrorHandlers/NotFoundError';
+import * as admin from 'firebase-admin';
+import logger from '../Config/LoggerConfig';
 
 /**
  * Retrieves user profile information from Firebase Auth
@@ -109,6 +112,57 @@ export const updateUserController = async (
     // update user
     const updatedUser = await updateUser(uid, req.body);
     res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Handles Google OAuth authentication and user creation/retrieval
+ * @param req - The request object containing Google ID token
+ * @param res - The response object
+ * @returns JSON response with user data
+ * @description Verifies Google ID token, checks if user exists, creates new user if needed, or returns existing user data
+ */
+export const googleAuthController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return next(new ValidationError('ID token is required'));
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    const { uid, email, name } = decodedToken;
+    logger.info('Google OAuth - Decoded token UID:', uid);
+    logger.info('Google OAuth - Email:', email);
+    logger.info('Google OAuth - Name:', name);
+
+    try {
+      const existingUser = await getUserFromFirebaseToken(uid);
+      logger.info('Google OAuth - Found existing user:', existingUser.id);
+      res.json({ success: true, user: existingUser });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        logger.info('Google OAuth - Creating new user for UID:', uid);
+        const newUser = await createOAuthUser({
+          email: email || '',
+          name: name || '',
+          jobRole: '',
+          lastLogin: new Date(),
+        }, uid);
+        logger.info('Google OAuth - Created new user:', newUser.id, 'with UID:', newUser.firebaseUid);
+        res.json({ success: true, user: newUser });
+      } else {
+        logger.error('Google OAuth - Unexpected error:', error);
+        throw error;
+      }
+    }
   } catch (error) {
     next(error);
   }
