@@ -90,7 +90,7 @@ A lightweight, rate-limited Express.js service, containerized for scalable deplo
 
 ### Dockerfile Highlights
 
-- **Base**: `node:20.16.0`
+- **Base**: `node:24.22.1`
 - **Workdir**: `/app`
 - **Installs**: Production dependencies, builds TypeScript
 - **Entrypoint**: Runs with `npm run serve` (serves `dist/server.js`)
